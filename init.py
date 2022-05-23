@@ -1,6 +1,6 @@
 from tableauscraper import TableauScraper as TS
 import pandas as pd
-import numpy as np
+# import numpy as np
 
 # NOTES
 # rate is per 100k population
@@ -23,7 +23,7 @@ filters = ws.getFilters()
 # print(filters)
 
 for ha in haList:
-    print(ha)
+    # print(ha)
     # set filter value
     wb = ws.setFilter('HA Name1', ha)
 
@@ -36,12 +36,17 @@ for ha in haList:
     df = df.assign(health_authority = ha)
     
     # save dataframe to file
-    print(df)
+    # print(df)
     ha_sex = ha_sex.append(df, ignore_index=True)
 
-# write csv file
+# rename columns
 ha_sex = ha_sex.rename(columns={'BCCS Date (C Months)-value':'date','AGG(Rate)-value':'rate', 'Breakdown by-alias':'gender'})
-ha_sex.to_csv('./data/deaths-by-sex.csv')
+
+# pivot wider by sex
+df2 = ha_sex.pivot(index=['date','health_authority'],columns='gender', values='rate')
+
+# write csv file
+df2.to_csv('./data/deaths-by-sex.csv')
 
 
 # print('DONE!')``
