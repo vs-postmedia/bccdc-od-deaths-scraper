@@ -44,6 +44,7 @@ ha_sex = ha_sex.rename(columns={'BCCS Date (C Months)-value':'date','AGG(Rate)-v
 
 # pivot wider by sex
 df2 = ha_sex.pivot(index=['date','health_authority'],columns='gender', values='rate')
+df2 = df2.rename(columns={'Male':'Men','Female':'women'})
 
 # write csv file
 df2.to_csv('./data/deaths-by-sex.csv')
