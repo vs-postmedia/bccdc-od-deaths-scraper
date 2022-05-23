@@ -23,10 +23,12 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-        # with:
-        #   python-version: '3.9'
+        # github sets this for you
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run a one-line script
         run: echo Hello world!
@@ -46,8 +48,6 @@ jobs:
 
       # Commits data to repo
       - name: Commit results
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # github sets this for you
         run: |
           git commit -am "ran data update script"
           git push
