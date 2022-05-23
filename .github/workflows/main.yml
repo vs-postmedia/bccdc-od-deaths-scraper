@@ -31,11 +31,11 @@ jobs:
       - name: Run a one-line script
         run: echo Hello world!
 
-      # # Install needed libs
-      # - name: Install dependencies
-      #   run: |
-      #     python -m pip install TableauScraper
-      #     python -m pip install pandas
+      # Install needed libs
+      - name: Install dependencies
+        run: |
+          python -m pip install TableauScraper
+          python -m pip install pandas
 
 
       # # Runs our python script
