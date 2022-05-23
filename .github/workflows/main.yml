@@ -41,9 +41,9 @@ jobs:
       - name: Run scraper
         run: python init.py
 
-      # # Runs a set of commands using the runners shell (in this case, commits data to repo)
-      # - name: Commit results
-      #   run: |
-      #     git add -A
-      #     git commit -m "New data released - data updated || echo "No changes to commit"
-      #     git push origin || echo "no changes to commit"
+      # Runs a set of commands using the runners shell (in this case, commits data to repo)
+      - name: Commit results
+        run: |
+          git add -A
+          git commit -m "New data released - data updated || echo "No changes to commit"
+          git push origin || echo "no changes to commit"
