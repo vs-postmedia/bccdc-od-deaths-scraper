@@ -28,6 +28,9 @@ jobs:
         # with:
         #   python-version: '3.9'
 
+      - name: Run a one-line script
+        run: echo Hello world!
+
       # # Install needed libs
       # - name: Install dependencies
       #   run: |
