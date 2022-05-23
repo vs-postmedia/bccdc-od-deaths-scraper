@@ -40,14 +40,14 @@ jobs:
       # Runs our python script
       - name: Run scraper
         run: python init.py
-        uses: mikeal/publish-to-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # github sets this for you
+        # uses: mikeal/publish-to-github-action@master
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # github sets this for you
 
       # Runs a set of commands using the runners shell (in this case, commits data to repo)
-      # - name: Commit results
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # github sets this for you
-      #   run: |
-      #     git commit -am "ran data update script"
-      #     git push
+      - name: Commit results
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # github sets this for you
+        run: |
+          git commit -am "ran data update script"
+          git push
