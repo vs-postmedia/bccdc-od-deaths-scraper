@@ -48,6 +48,8 @@ jobs:
 
       # Commits data to repo
       - name: Commit results
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # github sets this for you
         run: |
           git commit -am "ran data update script"
           git push
