@@ -6,7 +6,7 @@ import pandas as pd
 # rate is per 100k population
 
 # VARS
-ha_sex = pd.DataFrame()
+df_all = pd.DataFrame()
 haList = ['All BC', 'Interior', 'Fraser', 'Vancouver Coastal', 'Vancouver Island', 'Northern']
 url = 'https://public.tableau.com/views/ODQuarterlyReportDashboard/IllicitOverdoseDeathsIndicator'
 
@@ -29,21 +29,25 @@ for ha in haList:
 
     # show new data for the worksheet
     filtered = wb.getWorksheet('BCCS Deaths Sex-Age')
-    # print(type(filtered.data))
+    # create pandas dataframe
     df = pd.DataFrame(data = filtered.data)
     # drop alias columns & add ha
     df = df.drop(df.columns[[1,4]], axis=1)
     df = df.assign(health_authority = ha)
+
+    # text cleanup
+    df['health_authority'] = df['health_authority'].str.replace('All BC', 'B.C.')
+    df['health_authority'] = df['health_authority'].str.replace('Vancouver Island', 'Island')
+    df['health_authority'] = df['health_authority'].str.replace('Vancouver Coastal', 'VCH')
     
-    # save dataframe to file
-    # print(df)
-    ha_sex = ha_sex.append(df, ignore_index=True)
+    # merge datasets
+    df_all = pd.concat([df_all, df])
 
 # rename columns
-ha_sex = ha_sex.rename(columns={'BCCS Date (C Months)-value':'date','AGG(Rate)-value':'rate', 'Breakdown by-alias':'gender'})
+df_all = df_all.rename(columns={'BCCS Date (C Months)-value':'date','AGG(Rate)-value':'rate', 'Breakdown by-alias':'gender'})
 
-# pivot wider by sex
-df2 = ha_sex.pivot(index=['date','health_authority'],columns='gender', values='rate')
+# pivot wider by sex & make colheds reader friendly
+df2 = df_all.pivot(index=['date','health_authority'],columns='gender', values='rate')
 df2 = df2.rename(columns={'Male':'Men','Female':'Women'})
 
 # write csv file
