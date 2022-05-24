@@ -29,14 +29,16 @@ for ha in haList:
 
     # show new data for the worksheet
     filtered = wb.getWorksheet('BCCS Deaths Sex-Age')
+    
     # create pandas dataframe
     df = pd.DataFrame(data = filtered.data)
+    
     # drop alias columns & add ha
     df = df.drop(df.columns[[1,4]], axis=1)
     df = df.assign(health_authority = ha)
 
     # text cleanup
-    df['health_authority'] = df['health_authority'].str.replace('All BC', 'B.C.')
+    df['health_authority'] = df['health_authority'].str.replace('All BC', 'All B.C.')
     df['health_authority'] = df['health_authority'].str.replace('Vancouver Island', 'Island')
     df['health_authority'] = df['health_authority'].str.replace('Vancouver Coastal', 'VCH')
     
