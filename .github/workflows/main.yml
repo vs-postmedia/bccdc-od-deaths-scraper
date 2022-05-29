@@ -30,9 +30,6 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run a one-line script
-        run: echo Hello world!
-
       # Install needed libs
       - name: Install dependencies
         run: |

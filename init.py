@@ -23,7 +23,6 @@ filters = ws.getFilters()
 # print(filters)
 
 for ha in haList:
-    # print(ha)
     # set filter value
     wb = ws.setFilter('HA Name1', ha)
 
@@ -32,6 +31,9 @@ for ha in haList:
     
     # create pandas dataframe
     df = pd.DataFrame(data = filtered.data)
+
+    # print(ha)
+    # print(df)
     
     # drop alias columns & add ha
     df = df.drop(df.columns[[1,4]], axis=1)
