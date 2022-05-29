@@ -24,7 +24,7 @@ filters = ws.getFilters()
 
 for ha in haList:
     # set filter value
-    wb = ws.setFilter('HA Name1', ha, filterDelta=TRUE)
+    wb = ws.setFilter('HA Name1', ha, filterDelta=True)
 
     # show new data for the worksheet
     filtered = wb.getWorksheet('BCCS Deaths Sex-Age')
