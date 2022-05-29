@@ -24,7 +24,7 @@ filters = ws.getFilters()
 
 for ha in haList:
     # set filter value
-    wb = ws.setFilter('HA Name1', ha)
+    wb = ws.setFilter('HA Name1', ha, filterDelta=TRUE)
 
     # show new data for the worksheet
     filtered = wb.getWorksheet('BCCS Deaths Sex-Age')
@@ -58,4 +58,4 @@ df2 = df2.rename(columns={'Male':'Men','Female':'Women'})
 df2.to_csv('./data/deaths-by-sex.csv')
 
 
-# print('DONE!')``
+# print('DONE!')
