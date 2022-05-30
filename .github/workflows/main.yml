@@ -38,7 +38,7 @@ jobs:
 
       # Runs our python script
       - name: Run scraper
-        run: python init.py
+        run: python tableau-scraper.py
 
       # Commits files
       - name: Commit results
