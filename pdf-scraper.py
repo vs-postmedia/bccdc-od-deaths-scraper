@@ -17,8 +17,6 @@ def scrapeLHA(input_file, output_file):
     # lha_json = pd.read_json(lha_path)
     lha_df = gpd.read_file(lha_path)
 
-    # print(lha_df)
-
     # read LHA table from PDF
     df = read_pdf(input_file, output_format="dataframe", pages='18-20', pandas_options={'header': None, 'names':['LHA_NAME','2016','2017','2018','2019','2020','2021','Deaths this year']}, multiple_tables=True, stream=True, area=[194.6,31,699,572])
     

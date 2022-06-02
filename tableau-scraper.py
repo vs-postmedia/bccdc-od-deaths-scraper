@@ -36,7 +36,7 @@ for ha in haList:
     # print(df)
     
     # drop alias columns & add ha
-    df = df.drop(df.columns[[1,4]], axis=1)
+    # df = df.drop(df.columns[[1,4]], axis=1)
     df = df.assign(health_authority = ha)
 
     # text cleanup
