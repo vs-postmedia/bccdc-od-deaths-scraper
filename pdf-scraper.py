@@ -45,7 +45,7 @@ def scrapeLHA(input_file, json_output, csv_output):
     df_geo.to_file(json_output, driver='GeoJSON', drop_id=True)
 
     # rename columns & write CSV file
-    df = df.rename(columns={'LHA':'Local Health Area'})
+    df = df.rename(columns={'LHA_NAME':'Local Health Area'})
     df.to_csv(csv_output, index=False)
 
 
