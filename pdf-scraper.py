@@ -7,7 +7,7 @@ import pandas as pd
 
 # VARS
 file_path = './data/pdf/illicit-drug.pdf'
-lha_path = './data/source/lha-2018-epsg4326_7pct.json'
+lha_geo_path = './data/source/lha-2018-epsg4326_7pct.json'
 lha_jcsv_path = './data/deaths-by-lha.csv'
 lha_json_path = './data/deaths-by-lha.json'
 city_deaths_path = './data/deaths-by-city.csv'
@@ -17,15 +17,24 @@ file_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-
 # FUNCTIONS
 def scrapeLHA(input_file, json_output, csv_output):
     # lha_json = pd.read_json(lha_path)
-    lha_df = gpd.read_file(lha_path)
+    lha_df = gpd.read_file(lha_geo_path)
 
     # read LHA table from PDF
-    df = read_pdf(input_file, output_format="dataframe", pages='18-20', pandas_options={'header': None, 'names':['LHA_NAME','2016','2017','2018','2019','2020','2021','Deaths this year']}, multiple_tables=True, stream=True, area=[194.6,31,699,572])
+    df1 = read_pdf(input_file, output_format="dataframe", pages='18-19', pandas_options={'header': None, 'names':['LHA_NAME','2016','2017','2018','2019','2020','2021','Deaths this year']}, stream=True, area=[180,31,725,572])
+    df2 = read_pdf(input_file, output_format="dataframe", pages='20', pandas_options={'header': None, 'names':['LHA_NAME','2016','2017','2018','2019','2020','2021','Deaths this year']}, stream=True, area=[180,31,400,572])
     
     # drop non-data rows
-    df = df[0].iloc[:-16]
-    df.to_csv(csv_output, index=False)
-    # print(df)
+    df1 = df1[0].iloc[:-16]
+    df2 = df2[0]
+ 
+    # text cleanup
+    df1['LHA_NAME'] = df1['LHA_NAME'].str.replace('Maple Ridge/Pitt', 'Maple Ridge/Pitt Meadows')
+    df2['LHA_NAME'] = df2['LHA_NAME'].str.replace('West Vancouver/Bowen', 'West Vancouver/Bowen Island')
+
+    df1.drop(index = df1[df1['LHA_NAME'] == 'Meadows'].index, inplace=True)
+    df2.drop(index = df2[df2['LHA_NAME'] == 'Island'].index, inplace=True)
+
+    df = df1.merge(df2, on='LHA_NAME', how='left')
 
     # merge with LHA geojson data
     df_geo = lha_df.merge(df, on='LHA_NAME', how='left')
@@ -33,6 +42,10 @@ def scrapeLHA(input_file, json_output, csv_output):
 
     # write geojson file
     df_geo.to_file(json_output, driver='GeoJSON', drop_id=True)
+
+    # rename columns & write CSV file
+    df = df.rename(columns={'LHA':'Local Health Area'})
+    df.to_csv(csv_output, index=False)
 
 
 def scrapeCityDeaths(input_file, output_file):
