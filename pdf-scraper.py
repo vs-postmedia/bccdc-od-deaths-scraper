@@ -34,7 +34,8 @@ def scrapeLHA(input_file, json_output, csv_output):
     df1.drop(index = df1[df1['LHA_NAME'] == 'Meadows'].index, inplace=True)
     df2.drop(index = df2[df2['LHA_NAME'] == 'Island'].index, inplace=True)
 
-    df = df1.merge(df2, on='LHA_NAME', how='left')
+    # concat results from all 3 df pages
+    df = pd.concat([df1, df2], axis=0)
 
     # merge with LHA geojson data
     df_geo = lha_df.merge(df, on='LHA_NAME', how='left')
