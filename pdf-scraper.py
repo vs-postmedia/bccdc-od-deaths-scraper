@@ -6,6 +6,7 @@ import pandas as pd
 # import json
 
 # VARS
+current_year = '2021'
 file_path = './data/pdf/illicit-drug.pdf'
 lha_geo_path = './data/source/lha-2018-epsg4326_7pct.json'
 lha_jcsv_path = './data/deaths-by-lha.csv'
@@ -29,7 +30,7 @@ def scrapeLHA(input_file, json_output, csv_output):
  
     # text cleanup
     df1['LHA_NAME'] = df1['LHA_NAME'].str.replace('Maple Ridge/Pitt', 'Maple Ridge/Pitt Meadows')
-    df2['LHA_NAME'] = df2['LHA_NAME'].str.replace('West Vancouver/Bowen', 'West Vancouver/Bowen Island')
+    df2['LHA_NAME'] = df2['LHA_NAME'].str.replace('West Vancouver & Bowen', 'West Vancouver/Bowen Island')
 
     df1.drop(index = df1[df1['LHA_NAME'] == 'Meadows'].index, inplace=True)
     df2.drop(index = df2[df2['LHA_NAME'] == 'Island'].index, inplace=True)
@@ -38,7 +39,8 @@ def scrapeLHA(input_file, json_output, csv_output):
     df = pd.concat([df1, df2], axis=0)
 
     # merge with LHA geojson data
-    df_geo = lha_df.merge(df, on='LHA_NAME', how='left')
+    df_current = df[['LHA_NAME', current_year]]
+    df_geo = lha_df.merge(df_current, on='LHA_NAME', how='left')
     df_geo.fillna('', inplace=True)
 
     # write geojson file
