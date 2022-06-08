@@ -120,7 +120,6 @@ def scrapeLHA(input_file, json_output, csv_output):
 
 
 # AUTOBOTS... ROLL OUT!!!
-
 scrapeMonthlyDeaths(file_url, monthly_deaths_path)
 
 # scrapeLHA(file_path, lha_json_path, lha_csv_path)

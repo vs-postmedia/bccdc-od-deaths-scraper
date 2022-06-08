@@ -12,6 +12,7 @@ url = 'https://public.tableau.com/views/ODQuarterlyReportDashboard/IllicitOverdo
 # GET TO WORK!
 ts = TS()
 ts.loads(url)
+print(ts)
 # ws = ts.getWorksheet('BCCS Deaths Rate')
 
 
@@ -59,6 +60,6 @@ def scrapeDeathsBySexHA(ts):
     df2.to_csv('./data/deaths-by-sex.csv')
 
 # AUTOBOTS... ROLL OUT!!!
-scrapeDeathsBySexHA(ws)
+scrapeDeathsBySexHA(ts)
 
 print('DONE!')
