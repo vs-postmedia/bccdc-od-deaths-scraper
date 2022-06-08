@@ -14,26 +14,73 @@ lha_geo_path = './data/source/lha-2018-epsg4326_7pct.json'
 lha_csv_path = './data/deaths-by-lha.csv'
 lha_json_path = './data/deaths-by-lha.json'
 city_deaths_path = './data/deaths-by-city.csv'
+monthly_deaths_path = './data/monthly-deaths.csv'
 #  this URL doesn't work for some reason...
 file_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
 
 # FUNCTIONS
+def scrapeMonthlyDeaths(input_file, csv_output):
+    df = read_pdf(input_file, output_format="dataframe", pages='4', stream=True, area=[86,52.5,355,589])
+
+    # with open('./data/test.json', 'w') as f:
+    #     json.dump(df, f)
+
+    # drop "total" & "average" rows
+    df = df[0].iloc[:-2]
+    # drop "subtotal" row
+    df.drop(index = df[df['Month'] == 'Subtotal'].index, inplace=True)
+
+    # pivot longer
+    df = df.melt(id_vars='Month', value_name='Deaths')
+    # make a date column
+    df['Date'] = df['Month'].str.cat(df['variable'].values, sep='. ')
+    # cleanup
+    df['Date'] = df['Date'].str.replace('May.', 'May')
+    df['Date'] = df['Date'].str.replace('Jun.', 'June')
+    df['Date'] = df['Date'].str.replace('Jul.', 'July')
+    df.drop(['Month', 'variable'], axis=1, inplace=True)
+    df = df[['Date', 'Deaths']]
+    
+    # print(df)
+    # write to file
+    df.to_csv(csv_output, index=False)
+
+
+
+def scrapeCityDeaths(input_file, output_file):
+    # read city deaths table from PDF
+    df = read_pdf(input_file, output_format="dataframe", pages='11', stream=True, area=[130,52.5,424,588])
+
+    # drop "total" & "other" rows
+    df = df[0].iloc[:-2]
+    print(df)
+
+    # write csv file
+    df.to_csv(output_file, index=False)
+
+
 def scrapeLHA(input_file, json_output, csv_output):
     # admin boundaries for LHAs
     lha_df = gpd.read_file(lha_geo_path)
 
     # read LHA tables from PDF
-    dfx = read_pdf(input_file, output_format="json", pages="19", stream=True, area=[180,31,2000,572])
+    dfx = read_pdf(input_file, output_format="json", pages="19", stream=True, area=[180,31,715,572])
     
-    # with open('./data/test.json', 'w') as f:
-    #     json.dump(dfx, f)
+    with open('./data/test.json', 'w') as f:
+        json.dump(dfx, f)
 
+    
     # convert json into dataframe
     df1 = pd.json_normalize(dfx, record_path=['data'][0])
-    print(df1.head(5))
+    print(df1[0][17])
+
+    df1.to_csv('./data/test.csv')
+
     
 
-    df1 = read_pdf(input_file, output_format="dataframe", pages='19', pandas_options={'header': None, 'names':['LHA_NAME','2016','2017','2018','2019','2020','2021','Deaths this year']}, stream=True, area=[180,31,2000,572])
+    
+
+    df1 = read_pdf(input_file, output_format="dataframe", pages='19', pandas_options={'header': None, 'names':['LHA_NAME','2016','2017','2018','2019','2020','2021','Deaths this year']}, stream=True, area=[180,31,715,572])
     df2 = read_pdf(input_file, output_format="dataframe", pages='20', pandas_options={'header': None, 'names':['LHA_NAME','2016','2017','2018','2019','2020','2021','Deaths this year']}, stream=True, area=[180,31,400,572])
     
     # drop non-data rows
@@ -68,21 +115,10 @@ def scrapeLHA(input_file, json_output, csv_output):
     df.to_csv(csv_output, index=False)
 
 
-def scrapeCityDeaths(input_file, output_file):
-    # read city deaths table from PDF
-    df = read_pdf(input_file, output_format="dataframe", pages='11', stream=True, area=[130,52.5,424,588])
-
-    # print(df)
-    # drop "total" & "other" rows
-    df = df[0].iloc[:-2]
-    print(df)
-
-    # write csv file
-    df.to_csv(output_file, index=False)
-
 
 # AUTOBOTS... ROLL OUT!!!
-scrapeLHA(file_path, lha_json_path, lha_csv_path)
+scrapeMonthlyDeaths(file_path, monthly_deaths_path)
+# scrapeLHA(file_path, lha_json_path, lha_csv_path)
 # scrapeCityDeaths(file_path, city_deaths_path)
 # more scrapers here...
 
