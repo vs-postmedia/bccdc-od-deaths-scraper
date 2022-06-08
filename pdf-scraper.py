@@ -22,10 +22,6 @@ file_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-
 # FUNCTIONS
 def scrapeMonthlyDeaths(input_file, csv_output):
     df = read_pdf(input_file, output_format="dataframe", pages='4', stream=True, area=[86,52.5,355,589], user_agent=user_agent_string)
-    
-
-    # with open('./data/test.json', 'w') as f:
-    #     json.dump(df, f)
 
     # drop "total" & "average" rows
     df = df[0].iloc[:-2]
@@ -36,11 +32,15 @@ def scrapeMonthlyDeaths(input_file, csv_output):
     df = df.melt(id_vars='Month', value_name='Deaths')
     # make a date column
     df['Date'] = df['Month'].str.cat(df['variable'].values, sep='. ')
-    # cleanup
+    # cleanup dates
     df['Date'] = df['Date'].str.replace('May.', 'May')
     df['Date'] = df['Date'].str.replace('Jun.', 'June')
     df['Date'] = df['Date'].str.replace('Jul.', 'July')
+
+    # drop unused columns & row
     df.drop(['Month', 'variable'], axis=1, inplace=True)
+    df.drop(index = df[df['Deaths'] == '-'].index, inplace=True)
+    # reorder columns
     df = df[['Date', 'Deaths']]
     
     # print(df)
@@ -66,7 +66,7 @@ def scrapeLHA(input_file, json_output, csv_output):
     lha_df = gpd.read_file(lha_geo_path)
 
     # read LHA tables from PDF
-    dfx = read_pdf(input_file, output_format="json", pages="19", stream=True, area=[180,31,715,572], user_agent=user_agent_string)
+    dfx = read_pdf(input_file, output_format="json", pages="19", stream=True, area=[180,31,715,572])
     
     with open('./data/test.json', 'w') as f:
         json.dump(dfx, f)
