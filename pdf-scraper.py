@@ -15,7 +15,7 @@ lha_csv_path = './data/deaths-by-lha.csv'
 lha_json_path = './data/deaths-by-lha.json'
 city_deaths_path = './data/deaths-by-city.csv'
 monthly_deaths_path = './data/monthly-deaths.csv'
-
+# why this agent? who knows...
 user_agent_string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 file_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
 
@@ -40,6 +40,7 @@ def scrapeMonthlyDeaths(input_file, csv_output):
     # drop unused columns & row
     df.drop(['Month', 'variable'], axis=1, inplace=True)
     df.drop(index = df[df['Deaths'] == '-'].index, inplace=True)
+    
     # reorder columns
     df = df[['Date', 'Deaths']]
     
@@ -121,7 +122,6 @@ def scrapeLHA(input_file, json_output, csv_output):
 # AUTOBOTS... ROLL OUT!!!
 
 scrapeMonthlyDeaths(file_url, monthly_deaths_path)
-# df2 = read_pdf(file_url, user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36')
 
 # scrapeLHA(file_path, lha_json_path, lha_csv_path)
 # scrapeCityDeaths(file_path, city_deaths_path)
