@@ -35,7 +35,7 @@ jobs:
         run: |
           python -m pip install TableauScraper
           python -m pip install pandas
-          python -m pip install tabula
+          python -m pip install tabula-py
 
       # Runs our python script
       - name: Scrape BCCDC Tableau dashboard

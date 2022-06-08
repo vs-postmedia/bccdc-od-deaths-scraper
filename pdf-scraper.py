@@ -1,10 +1,10 @@
-from tabula import convert_into, read_pdf
+from tabula import read_pdf
 # from shapely.geometry import shape
 from geopandas import gpd
 # from tabulate import tabulate
 import pandas as pd
 import json
-from glom import glom
+# from glom import glom
 
 
 # VARS
