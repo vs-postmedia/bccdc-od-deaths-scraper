@@ -12,12 +12,13 @@ url = 'https://public.tableau.com/views/ODQuarterlyReportDashboard/IllicitOverdo
 # GET TO WORK!
 ts = TS()
 ts.loads(url)
-# workbook = ts.getWorkbook()
 # ws = ts.getWorksheet('BCCS Deaths Rate')
-ws = ts.getWorksheet('BCCS Deaths Sex-Age')
 
-def scrapeDeathsBySexHA(ws):
+
+def scrapeDeathsBySexHA(ts):
     df_all = pd.DataFrame()
+    ws = ts.getWorksheet('BCCS Deaths Sex-Age')
+
     # get filter columns & values
     filters = ws.getFilters()
     # print(filters)
