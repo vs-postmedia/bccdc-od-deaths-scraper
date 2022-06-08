@@ -35,10 +35,13 @@ jobs:
         run: |
           python -m pip install TableauScraper
           python -m pip install pandas
+          python -m pip install tabula
 
       # Runs our python script
-      - name: Run scraper
+      - name: Scrape BCCDC Tableau dashboard
         run: python tableau-scraper.py
+      - name: Scrape illicit drug deaths PDF from B.C. Coroner
+        run: python pdf-scraper.py
 
       # Commits files
       - name: Commit results
@@ -51,3 +54,5 @@ jobs:
           git add -A
           git commit -am "ran data update script"
           git push
+
+  
