@@ -15,12 +15,14 @@ lha_csv_path = './data/deaths-by-lha.csv'
 lha_json_path = './data/deaths-by-lha.json'
 city_deaths_path = './data/deaths-by-city.csv'
 monthly_deaths_path = './data/monthly-deaths.csv'
-#  this URL doesn't work for some reason...
+
+user_agent_string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 file_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
 
 # FUNCTIONS
 def scrapeMonthlyDeaths(input_file, csv_output):
-    df = read_pdf(input_file, output_format="dataframe", pages='4', stream=True, area=[86,52.5,355,589])
+    df = read_pdf(input_file, output_format="dataframe", pages='4', stream=True, area=[86,52.5,355,589], user_agent=user_agent_string)
+    
 
     # with open('./data/test.json', 'w') as f:
     #     json.dump(df, f)
@@ -49,7 +51,7 @@ def scrapeMonthlyDeaths(input_file, csv_output):
 
 def scrapeCityDeaths(input_file, output_file):
     # read city deaths table from PDF
-    df = read_pdf(input_file, output_format="dataframe", pages='11', stream=True, area=[130,52.5,424,588])
+    df = read_pdf(input_file, output_format="dataframe", pages='11', stream=True, area=[130,52.5,424,588], user_agent=user_agent_string)
 
     # drop "total" & "other" rows
     df = df[0].iloc[:-2]
@@ -64,7 +66,7 @@ def scrapeLHA(input_file, json_output, csv_output):
     lha_df = gpd.read_file(lha_geo_path)
 
     # read LHA tables from PDF
-    dfx = read_pdf(input_file, output_format="json", pages="19", stream=True, area=[180,31,715,572])
+    dfx = read_pdf(input_file, output_format="json", pages="19", stream=True, area=[180,31,715,572], user_agent=user_agent_string)
     
     with open('./data/test.json', 'w') as f:
         json.dump(dfx, f)
@@ -117,7 +119,10 @@ def scrapeLHA(input_file, json_output, csv_output):
 
 
 # AUTOBOTS... ROLL OUT!!!
-scrapeMonthlyDeaths(file_path, monthly_deaths_path)
+
+scrapeMonthlyDeaths(file_url, monthly_deaths_path)
+# df2 = read_pdf(file_url, user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36')
+
 # scrapeLHA(file_path, lha_json_path, lha_csv_path)
 # scrapeCityDeaths(file_path, city_deaths_path)
 # more scrapers here...
