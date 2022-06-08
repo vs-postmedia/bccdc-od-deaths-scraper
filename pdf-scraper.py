@@ -1,9 +1,9 @@
-from tabula import read_pdf
-# from shapely.geometry import shape
-from geopandas import gpd
-# from tabulate import tabulate
 import pandas as pd
-import json
+from tabula import read_pdf
+# from geopandas import gpd
+
+# from shapely.geometry import shape
+# import json
 # from glom import glom
 
 
