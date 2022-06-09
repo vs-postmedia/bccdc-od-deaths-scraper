@@ -9,23 +9,49 @@ from tabula import read_pdf
 
 # VARS
 current_year = '2021'
-file_path = './data/pdf/illicit-drug.pdf'
 lha_geo_path = './data/source/lha-2018-epsg4326_7pct.json'
+# why this agent? who knows...
+user_agent_string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+
+### INPUTS ### 
+file_path = './data/pdf/illicit-drug.pdf'
+file_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
+
+
+### OUTPUT FILES ###
 lha_csv_path = './data/deaths-by-lha.csv'
 lha_json_path = './data/deaths-by-lha.json'
 city_deaths_path = './data/deaths-by-city.csv'
 monthly_deaths_path = './data/monthly-deaths.csv'
-# why this agent? who knows...
-user_agent_string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
-file_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
+yearly_deaths_path = './data/yearly-deaths.csv'
+
+
 
 
 # FUNCTIONS
-def scrapeMonthlyDeaths(input_file, csv_output):
+def scrapeDeathsTimeseries(input_file, monthly_output, yearly_output):
     df = read_pdf(input_file, output_format="dataframe", pages='4', stream=True, area=[76,52.5,355,589], user_agent=user_agent_string)
+    df = df[0]
 
+    ### YEARLY ###
+    # get annual numbers & pivot longer
+    df_totals = df[df['Month'] == 'Total']
+    df_totals = df_totals.melt(id_vars='Month', var_name='Year', value_name='Deaths', ignore_index=True)
+    
+    # convert string to number
+    df_totals['Deaths'].replace(',', '', inplace=True)
+
+    # drop unused col
+    df_totals.drop(['Month'], axis=1, inplace=True)
+    
+    # write to file
+    df_totals.to_csv(yearly_output, index=False)
+
+    
+
+    ### MONTHLY ###
     # drop "total" & "average" rows
-    df = df[0].iloc[:-2]
+    df = df.iloc[:-2]
 
     # drop "subtotal" row
     df.drop(index = df[df['Month'] == 'Subtotal'].index, inplace=True)
@@ -48,7 +74,7 @@ def scrapeMonthlyDeaths(input_file, csv_output):
     
     # print(df)
     # write to file
-    df.to_csv(csv_output, index=False)
+    df.to_csv(monthly_output, index=False)
 
 
 
@@ -58,7 +84,6 @@ def scrapeCityDeaths(input_file, output_file):
 
     # drop "total" & "other" rows
     df = df[0].iloc[:-2]
-    print(df)
 
     # write csv file
     df.to_csv(output_file, index=False)
@@ -122,10 +147,9 @@ def scrapeLHA(input_file, json_output, csv_output):
 
 
 # AUTOBOTS... ROLL OUT!!!
-scrapeMonthlyDeaths(file_url, monthly_deaths_path)
-
+scrapeDeathsTimeseries(file_url, monthly_deaths_path, yearly_deaths_path)
 # scrapeLHA(file_path, lha_json_path, lha_csv_path)
-# scrapeCityDeaths(file_path, city_deaths_path)
+scrapeCityDeaths(file_path, city_deaths_path)
 # more scrapers here...
 
 print('DONE!!!')
