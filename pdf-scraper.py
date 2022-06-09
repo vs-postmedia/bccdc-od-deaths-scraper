@@ -19,12 +19,14 @@ monthly_deaths_path = './data/monthly-deaths.csv'
 user_agent_string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 file_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
 
+
 # FUNCTIONS
 def scrapeMonthlyDeaths(input_file, csv_output):
-    df = read_pdf(input_file, output_format="dataframe", pages='4', stream=True, area=[86,52.5,355,589], user_agent=user_agent_string)
+    df = read_pdf(input_file, output_format="dataframe", pages='4', stream=True, area=[76,52.5,355,589], user_agent=user_agent_string)
 
     # drop "total" & "average" rows
     df = df[0].iloc[:-2]
+
     # drop "subtotal" row
     df.drop(index = df[df['Month'] == 'Subtotal'].index, inplace=True)
 
