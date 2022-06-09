@@ -33,7 +33,6 @@ def scrapeParamedicEvents(url, sheet, output_file):
     df = pd.DataFrame(data = ws.data)
 
     for ha in haList:
-        print(ha)
         # set filter value
         wb = ws.setFilter('HA Name1', ha, filterDelta=False)
 
@@ -118,7 +117,7 @@ def scrapeDeathsBySexHA(url, sheet):
 
 
 ### AUTOBOTS... ROLL OUT!!! ###
-# scrapeDeathsBySexHA(od_url, od_sheet)
+scrapeDeathsBySexHA(od_url, od_sheet)
 scrapeParamedicEvents(paramedic_url, paramedic_sheet, paramedic_output)
 
 
