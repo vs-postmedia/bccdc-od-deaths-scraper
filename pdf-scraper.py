@@ -95,7 +95,7 @@ def scrapeCityDeaths(input_file, output_file):
     df_long = df_long.merge(pop, on='City', how='left')
 
     # calculate rate
-    df_long['Deaths per 100,000'] = df_long['Deaths'].astype(int) / df_long['population_2021'] * 1000
+    df_long['Deaths per 100,000'] = df_long['Deaths'].astype(int) / df_long['population_2021'] * 100000
 
     # pivot wide for small multiple
     df_wide = df_long.pivot(index='City', columns='Year', values='Deaths per 100,000')
