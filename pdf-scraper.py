@@ -105,7 +105,7 @@ def scrapeCityDeaths(input_file, output_file):
     # df_long = df_long[df_long['Year'] == '2022']
 
     # write csv file
-    df_wide.to_csv(output_file, index=False)
+    df_wide.to_csv(output_file)
     # NOTE: HAVE TO WRITE FILE FOR DF_MAP
 
 
