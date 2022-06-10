@@ -45,18 +45,18 @@ jobs:
 
       # Commits files
       - name: Commit results
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # github sets this for you
-
         run: |
           git config --global user.email "action@hgithub.com"
           git config --global user.name "Github action"
           git commit -am "ran data update script"
+          
       
       # Push changes
       - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+        # uses: ad-m/github-push-action@master
+        env: #with
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git push
 
   
