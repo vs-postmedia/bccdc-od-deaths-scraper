@@ -24,6 +24,7 @@ deaths_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-an
 ### OUTPUT FILES ###
 lha_csv_path = './data/deaths-by-lha.csv'
 lha_json_path = './data/deaths-by-lha.json'
+age_deaths_path = './data-deaths-by-age.csv'
 city_deaths_path = './data/deaths-by-city.csv'
 monthly_deaths_path = './data/monthly-deaths.csv'
 yearly_deaths_path = './data/yearly-deaths.csv'
@@ -109,6 +110,44 @@ def scrapeCityDeaths(input_file, output_file):
     df_wide.to_csv(output_file)
     # NOTE: HAVE TO WRITE FILE FOR DF_MAP
 
+def scrapeAges(input_file, output_file):
+    # read city deaths table from PDF
+    df = read_pdf(input_file, output_format="dataframe", pages='8', stream=True, multiple_tables=True, user_agent=user_agent_string) # area=[549,52.5,354,703])
+
+    # drop "total" & "unknown" rows
+    df = df[0].iloc[:-2].iloc[10:]
+    # some fugly cleanup
+    df = df.dropna(axis=1)
+    # rename columns
+    df.rename(columns = {'2012':'2019', '2013':'2020', '2014':'2021','2015':'2022'}, inplace = True)
+    # the space in "Age Group" will cause trouble later on
+    df['Sex'] = df['Sex'].str.replace('Age Group', 'Ages')
+    # separate the first column with is all mashed together & split it to separate columns
+    df_tmp = df.iloc[:,:1]
+    df_tmp[['Ages','2012','2013','2014','2015','2016','2017','2018']] = df_tmp['Sex'].str.split(' ', expand=True)
+    # drop unused col
+    df_tmp.drop(['Sex'], axis=1, inplace=True)
+    
+    # merge two dfs
+    df_tmp['2019'] = pd.Series(df['2019'])
+    df_tmp['2020'] = pd.Series(df['2020'])
+    df_tmp['2021'] = pd.Series(df['2021'])
+    df_tmp['2022'] = pd.Series(df['2022'])
+
+    # Copy edits to data
+    df = df_tmp.drop(index = df_tmp[df_tmp['Ages'] == 'Ages'].index)
+    df['Ages'] = df['Ages'].str.replace('<19', 'Under 19')
+    
+    # NOW WE NEED TO SUM BY AGE
+    df_long = df.melt(id_vars='Ages', var_name='Year', value_name='Deaths', ignore_index=True)
+    df_long['Deaths'] = df_long['Deaths'].astype(int)
+    df_sum = df_long[df_long['Year'].astype(int) >= 2016 ].groupby(['Ages']).sum()
+
+    # write CSV file
+    df.to_csv(output_file)
+
+
+
 def scrapeLHA(input_file, json_output, csv_output):
     # admin boundaries for LHAs
     lha_df = gpd.read_file(lha_geo_path)
@@ -167,8 +206,9 @@ def scrapeLHA(input_file, json_output, csv_output):
 
 # AUTOBOTS... ROLL OUT!!!
 # scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
-# scrapeLHA(file_path, lha_json_path, lha_csv_path)
 scrapeCityDeaths(deaths_url, city_deaths_path)
+scrapeAges(deaths_url, age_deaths_path)
 # more scrapers here...
+# scrapeLHA(file_path, lha_json_path, lha_csv_path)
 
 print('DONE!!!')
