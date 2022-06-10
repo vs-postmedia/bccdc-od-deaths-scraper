@@ -43,13 +43,17 @@ jobs:
       - name: Scrape illicit drug deaths PDF from B.C. Coroner
         run: python pdf-scraper.py
 
+      # Check for changes
+      - name: Check for changfes
+        run: |
+          git status
+
       # Commits files
       - name: Commit results
         run: |
           git config --global user.email "action@hgithub.com"
           git config --global user.name "Github action"
           git commit -am "ran data update script"
-          
       
       # Push changes
       - name: Push changes
