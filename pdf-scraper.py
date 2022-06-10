@@ -1,3 +1,4 @@
+from operator import index
 import pandas as pd
 from tabula import read_pdf
 # from geopandas import gpd
@@ -10,6 +11,7 @@ from tabula import read_pdf
 # VARS
 current_year = '2021'
 lha_geo_path = './data/source/lha-2018-epsg4326_7pct.json'
+city_pop = './data/source/city-populations.csv'
 # why this agent? who knows...
 user_agent_string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 
@@ -76,29 +78,34 @@ def scrapeDeathsTimeseries(input_file, monthly_output, yearly_output):
     # print(df)
     # write to file
     df.to_csv(monthly_output, index=False)
-
-
-
 def scrapeCityDeaths(input_file, output_file):
+    # get city populations
+    pop = pd.read_csv(city_pop)
     # read city deaths table from PDF
     df = read_pdf(input_file, output_format="dataframe", pages='11', stream=True, area=[130,52.5,424,588], user_agent=user_agent_string)
 
-    # drop "total" & "other" rows
+    # drop "total" & "other" rows/vs-postmedia/bccdc-od-deaths-scraper/raw/main/data/deaths-by-city.csv
     df = df[0].iloc[:-2]
     # rename township
     df.rename(columns = {'Township':'City'}, inplace = True)
+   
+    # wide to long 
+    df_long = df.melt(id_vars='City', var_name='Year', value_name='Deaths', ignore_index=True)
+    # add population column
+    df_long = df_long.merge(pop, on='City', how='left')
 
-    # wide to long & only keep the last year
-    df_map = df.melt(id_vars='City', var_name='Year', value_name='Deaths', ignore_index=True)
-    df_map = df_map[df_map['Year'] == '2022']
+    # calculate rate
+    df_long['Deaths per 100,000'] = df_long['Deaths'].astype(int) / df_long['population_2021'] * 100000
 
-    # transpose for small multiple charts
-    df.set_index('City', inplace=True)
-    df = df.transpose()
-    df.rename(columns = {'City':'Year'}, inplace = True)
+    # pivot wide for small multiple
+    df_wide = df_long.pivot(index='City', columns='Year', values='Deaths per 100,000')
+    df_wide = df_wide.transpose()
+
+    # we only want the latest year for the LHA map
+    # df_long = df_long[df_long['Year'] == '2022']
 
     # write csv file
-    df.to_csv(output_file)
+    df_wide.to_csv(output_file, index=False)
     # NOTE: HAVE TO WRITE FILE FOR DF_MAP
 
 
@@ -121,7 +128,6 @@ def scrapeLHA(input_file, json_output, csv_output):
 
     
 
-    
 
     df1 = read_pdf(input_file, output_format="dataframe", pages='19', pandas_options={'header': None, 'names':['LHA_NAME','2016','2017','2018','2019','2020','2021','Deaths this year']}, stream=True, area=[180,31,715,572])
     df2 = read_pdf(input_file, output_format="dataframe", pages='20', pandas_options={'header': None, 'names':['LHA_NAME','2016','2017','2018','2019','2020','2021','Deaths this year']}, stream=True, area=[180,31,400,572])
