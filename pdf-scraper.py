@@ -14,7 +14,7 @@ lha_geo_path = './data/source/lha-2018-epsg4326_7pct.json'
 user_agent_string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 
 ### INPUTS ### 
-file_path = './data/pdf/illicit-drug.pdf'
+file_path = '../pdfs/illicit-drug.pdf'
 deaths_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
 drugs_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug-type.pdf'
 
@@ -85,9 +85,21 @@ def scrapeCityDeaths(input_file, output_file):
 
     # drop "total" & "other" rows
     df = df[0].iloc[:-2]
+    # rename township
+    df.rename(columns = {'Township':'City'}, inplace = True)
+
+    # wide to long & only keep the last year
+    df_map = df.melt(id_vars='City', var_name='Year', value_name='Deaths', ignore_index=True)
+    df_map = df_map[df_map['Year'] == '2022']
+
+    # transpose for small multiple charts
+    df.set_index('City', inplace=True)
+    df = df.transpose()
+    df.rename(columns = {'City':'Year'}, inplace = True)
 
     # write csv file
     df.to_csv(output_file, index=False)
+    # NOTE: HAVE TO WRITE FILE FOR DF_MAP
 
 
 def scrapeLHA(input_file, json_output, csv_output):
@@ -148,9 +160,9 @@ def scrapeLHA(input_file, json_output, csv_output):
 
 
 # AUTOBOTS... ROLL OUT!!!
-scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
+# scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
 # scrapeLHA(file_path, lha_json_path, lha_csv_path)
-scrapeCityDeaths(deaths_url, city_deaths_path)
+scrapeCityDeaths(file_path, city_deaths_path)
 # more scrapers here...
 
 print('DONE!!!')
