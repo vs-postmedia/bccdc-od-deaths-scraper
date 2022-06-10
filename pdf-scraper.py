@@ -15,7 +15,8 @@ user_agent_string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/
 
 ### INPUTS ### 
 file_path = './data/pdf/illicit-drug.pdf'
-file_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
+deaths_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
+drugs_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug-type.pdf'
 
 
 ### OUTPUT FILES ###
@@ -147,9 +148,9 @@ def scrapeLHA(input_file, json_output, csv_output):
 
 
 # AUTOBOTS... ROLL OUT!!!
-scrapeDeathsTimeseries(file_url, monthly_deaths_path, yearly_deaths_path)
+scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
 # scrapeLHA(file_path, lha_json_path, lha_csv_path)
-scrapeCityDeaths(file_path, city_deaths_path)
+scrapeCityDeaths(deaths_url, city_deaths_path)
 # more scrapers here...
 
 print('DONE!!!')
