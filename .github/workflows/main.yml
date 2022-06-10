@@ -51,8 +51,12 @@ jobs:
         run: |
           git config --global user.email "action@hgithub.com"
           git config --global user.name "Github action"
-          git add -A
           git commit -am "ran data update script"
-          git push
+      
+      # Push changes
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
   
