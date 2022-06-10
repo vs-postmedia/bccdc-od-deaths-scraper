@@ -24,7 +24,7 @@ deaths_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-an
 ### OUTPUT FILES ###
 lha_csv_path = './data/deaths-by-lha.csv'
 lha_json_path = './data/deaths-by-lha.json'
-age_deaths_path = './data-deaths-by-age.csv'
+age_deaths_path = './data/deaths-by-age.csv'
 city_deaths_path = './data/deaths-by-city.csv'
 monthly_deaths_path = './data/monthly-deaths.csv'
 yearly_deaths_path = './data/yearly-deaths.csv'
