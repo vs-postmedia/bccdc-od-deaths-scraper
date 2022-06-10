@@ -144,7 +144,7 @@ def scrapeAges(input_file, output_file):
     df_sum = df_long[df_long['Year'].astype(int) >= 2016 ].groupby(['Ages']).sum()
 
     # write CSV file
-    df_sum.to_csv(output_file, index=False)
+    df_sum.to_csv(output_file)
 
 
 
