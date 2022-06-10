@@ -98,7 +98,7 @@ def scrapeCityDeaths(input_file, output_file):
     df.rename(columns = {'City':'Year'}, inplace = True)
 
     # write csv file
-    df.to_csv(output_file, index=False)
+    df.to_csv(output_file)
     # NOTE: HAVE TO WRITE FILE FOR DF_MAP
 
 
