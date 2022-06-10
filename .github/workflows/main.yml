@@ -43,8 +43,8 @@ jobs:
       - name: Scrape illicit drug deaths PDF from B.C. Coroner
         run: python pdf-scraper.py
 
-      # Commits files
-      - name: Commit results
+      # check for changed files
+      - name: Check for changed files
         run: |
           git status
 
