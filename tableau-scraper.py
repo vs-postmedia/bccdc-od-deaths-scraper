@@ -8,16 +8,19 @@ import pandas as pd
 # VARS
 paramedic_sheet = 'Paramedic Rate Attended' # 'Illegal ODs and Projected'
 od_sheet = 'BCCS Deaths Sex-Age' # 'BCCS Deaths Rate'
+ops_sheet = 'OPS Visits' #OPS Inhalation Visits, OPS Overdose
 
 haList = ['All BC', 'Interior', 'Fraser', 'Vancouver Coastal', 'Vancouver Island', 'Northern']
 
 # OUTPUT FILES
 paramedic_output = './data/paramedic-calls.csv'
 deaths_output = './data/deaths-by-sex.csv'
+ops_output = './data/ops-visits.csv'
 
 # SOURCE DATA
 od_url = 'https://public.tableau.com/views/ODQuarterlyReportDashboard/IllicitOverdoseDeathsIndicator'
 paramedic_url = 'https://public.tableau.com/views/ODQuarterlyReportDashboard/ParamedicAttendedOverdoseIndicator2'
+ops_url = 'https://public.tableau.com/views/ODQuarterlyReportDashboard/OPSSitesIndicators'
 
 # GET TO WORK!
 ts = TS()
@@ -68,6 +71,33 @@ def scrapeDeathsBySexHA(url, sheet, output_file):
     # write csv file
     df2.to_csv(output_file)
 
+def scrapeOpsIndicators(url, sheet, output_file):
+    ts.loads(url)
+
+    # get the worksheet
+    ws = ts.getWorksheet(sheet)
+
+    # create pandas dataframe
+    df = pd.DataFrame(data = ws.data)
+
+    # drop duplicate columns & rename the rest
+    df = df.loc[:,~df.columns.str.contains('alias', case=False)]
+    df = df.loc[:,~df.columns.str.contains('federated', case=False)]
+    df = df.rename(columns={'HA Name1-value':'Health authority','DAY(OPS Date)-value':'Date', 'AGG(ZN(SUM([Visits])))-value':'OPS visits'})
+
+    # text cleanup & copy edits
+    df['Date'] = df['Date'].str.replace(' 00:00:00', '')
+    df['Health authority'] = df['Health authority'].str.replace('All BC', 'B.C.')
+    df['Health authority'] = df['Health authority'].str.replace('Vancouver Coastal', 'VCH')
+    df['Health authority'] = df['Health authority'].str.replace('Vancouver Island', 'Island')
+    
+    # pivot wider by health authority
+    df = df.pivot(index='Date',columns='Health authority', values='OPS visits')
+
+    # write csv file
+    df.to_csv(output_file)
+
+
 def scrapeParamedicEvents(url, sheet, output_file):
     df_all = pd.DataFrame()
     
@@ -108,15 +138,10 @@ def scrapeParamedicEvents(url, sheet, output_file):
     df_all.to_csv(output_file)
 
 
-    ### GET WORKBOOK NAMES ###
-    workbook = ts.getWorkbook()
-    for t in workbook.worksheets:
-        print(f"worksheet name : {t.name}") #show worksheet name
-
-
 ### AUTOBOTS... ROLL OUT!!! ###
-scrapeDeathsBySexHA(od_url, od_sheet, deaths_output)
-scrapeParamedicEvents(paramedic_url, paramedic_sheet, paramedic_output)
+# scrapeDeathsBySexHA(od_url, od_sheet, deaths_output)
+scrapeOpsIndicators(ops_url, ops_sheet, ops_output)
+# scrapeParamedicEvents(paramedic_url, paramedic_sheet, paramedic_output)
 
 print('DONE!')
 
