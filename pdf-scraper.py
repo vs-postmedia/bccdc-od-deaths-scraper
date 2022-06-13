@@ -121,10 +121,10 @@ def scrapeAges(input_file, output_file):
     # rename columns
     df.rename(columns = {'2012':'2019', '2013':'2020', '2014':'2021','2015':'2022'}, inplace = True)
     # the space in "Age Group" will cause trouble later on
-    df['Sex'] = df['Sex'].str.replace('Age Group', 'Ages')
+    df['Sex'] = df['Sex'].str.replace('Age Group', 'Age')
     # separate the first column with is all mashed together & split it to separate columns
     df_tmp = df.iloc[:,:1]
-    df_tmp[['Ages','2012','2013','2014','2015','2016','2017','2018']] = df_tmp['Sex'].str.split(' ', expand=True)
+    df_tmp[['Age','2012','2013','2014','2015','2016','2017','2018']] = df_tmp['Sex'].str.split(' ', expand=True)
     # drop unused col
     df_tmp.drop(['Sex'], axis=1, inplace=True)
     
@@ -135,16 +135,20 @@ def scrapeAges(input_file, output_file):
     df_tmp['2022'] = pd.Series(df['2022'])
 
     # Copy edits to data
-    df = df_tmp.drop(index = df_tmp[df_tmp['Ages'] == 'Ages'].index)
-    df['Ages'] = df['Ages'].str.replace('<19', 'Under 19')
+    df = df_tmp.drop(index = df_tmp[df_tmp['Age'] == 'Age'].index)
+    df['Age'] = df['Age'].str.replace('<19', 'Under 19')
     
-    # NOW WE NEED TO SUM BY AGE
-    df_long = df.melt(id_vars='Ages', var_name='Year', value_name='Deaths', ignore_index=True)
+    # Sum by age
+    df_long = df.melt(id_vars='Age', var_name='Year', value_name='Deaths', ignore_index=True)
     df_long['Deaths'] = df_long['Deaths'].astype(int)
-    df_sum = df_long[df_long['Year'].astype(int) >= 2016 ].groupby(['Ages']).sum()
+    df_sum = df_long[df_long['Year'].astype(int) >= 2016 ].groupby(['Age']).sum()
 
+    # Sort for Flourish
+    df_sum = df_sum.reset_index()
+    df_sum = df_sum.reindex([5,4,3,2,1,0,6])
+    
     # write CSV file
-    df_sum.to_csv(output_file)
+    df_sum.to_csv(output_file, index=False)
 
 
 
