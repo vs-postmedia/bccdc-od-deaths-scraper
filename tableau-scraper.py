@@ -142,9 +142,9 @@ def scrapeParamedicEvents(url, sheet, output_file):
 
 
 ### AUTOBOTS... ROLL OUT!!! ###
-# scrapeDeathsBySexHA(od_url, od_sheet, deaths_output)
+scrapeDeathsBySexHA(od_url, od_sheet, deaths_output)
 scrapeOpsIndicators(ops_url, ops_sheet, ops_output)
-# scrapeParamedicEvents(paramedic_url, paramedic_sheet, paramedic_output)
+scrapeParamedicEvents(paramedic_url, paramedic_sheet, paramedic_output)
 
 print('DONE!')
 
