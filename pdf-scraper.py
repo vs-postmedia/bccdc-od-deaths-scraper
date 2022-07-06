@@ -12,7 +12,7 @@ user_agent_string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/
 
 
 ### INPUTS ### 
-file_path = './data/source/illicit-drug.pdf'
+# file_path = './data/source/illicit-drug.pdf'
 deaths_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
 # drugs_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug-type.pdf'
 
@@ -206,14 +206,18 @@ def scrapeHaLocation(input_file, output_file):
     # clean this fugly sh*t
     # list to dataframe & drop NaN
     df = df[0].dropna()
+
+    print(df)
     # rename columns
-    df.rename(columns = {'Unnamed: 0':'Location', 'Interior':'Interior', 'Fraser':'Fraser', 'Unnamed: 3':'VCH', 'Unnamed: 4':'Island', 'Northern':'Northern'}, inplace = True)
+    df.rename(columns = {'Unnamed: 0':'Location', 'Interior':'Interior', 'Fraser':'Fraser', 'Unnamed: 3':'VCH', 'Unnamed: 4':'Island', 'Unnamed: 5':'Northern'}, inplace = True)
 
     # Clean up location names
     df['Location'].replace('Other Residence', 'Hotel, SRO, etc.', inplace = True)
     df['Location'].replace('Private Residence', 'Private home', inplace = True)
     df['Location'].replace('Other Inside', 'Indoors, non-residential', inplace = True)
 
+
+    print(df)
     # we only want the % value (yes, I know there's a better way to do this... :P)
     df['Interior'] = df['Interior'].str.replace('%)', '', regex = False).str.replace('^.*\s[(]', '', regex = True)
     df['Fraser'] = df['Fraser'].str.replace('%)', '', regex = False).str.replace('^.*\s[(]', '', regex = True)
@@ -221,17 +225,15 @@ def scrapeHaLocation(input_file, output_file):
     df['Island'] = df['Island'].str.replace('%)', '', regex = False).str.replace('^.*\s[(]', '', regex = True)
     df['Northern'] = df['Northern'].str.replace('%)', '', regex = False).str.replace('^.*\s[(]', '', regex = True)
 
-    print(df)
-
     # write CSV file
     df.to_csv(output_file, index=False)
 
 
 # AUTOBOTS... ROLL OUT!!!
-# scrapeAges(deaths_url, age_deaths_path)
-# scrapeCityDeaths(deaths_url, city_deaths_path)
-# scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
-scrapeHaLocation(file_path, ha_location_deaths_path)
+scrapeAges(deaths_url, age_deaths_path)
+scrapeCityDeaths(deaths_url, city_deaths_path)
+scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
+scrapeHaLocation(deaths_url, ha_location_deaths_path)
 # more scrapers here...
 # LHA doesn't quite work using tableau.py
 # scrapeLHA(file_path, lha_json_path, lha_csv_path)
