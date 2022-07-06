@@ -38,10 +38,10 @@ jobs:
           python -m pip install tabula-py
 
       # Runs our python script
-      - name: Scrape BCCDC Tableau dashboard
-        run: python tableau-scraper.py
-      - name: Scrape illicit drug deaths PDF from B.C. Coroner
-        run: python pdf-scraper.py
+      - name: Scrape BCCDC Tableau dashboard & BCCS illicit deaths PDF
+        run: |
+          python tableau-scraper.py
+          python pdf-scraper.py
 
       # Commits files
       - name: Commit results
