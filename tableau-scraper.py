@@ -90,13 +90,16 @@ def scrapeOpsIndicators(url, sheet, output_file):
     df['Health authority'] = df['Health authority'].str.replace('All BC', 'B.C.')
     df['Health authority'] = df['Health authority'].str.replace('Vancouver Coastal', 'VCH')
     df['Health authority'] = df['Health authority'].str.replace('Vancouver Island', 'Island')
+
+    # ### TO DO:
+    # JOIN WITH OPS SITE COUNT OR POPULATION TO CREATE RATE
+    # ###
     
     # pivot wider by health authority
     df = df.pivot(index='Date',columns='Health authority', values='OPS visits')
 
     # write csv file
     df.to_csv(output_file)
-
 
 def scrapeParamedicEvents(url, sheet, output_file):
     df_all = pd.DataFrame()

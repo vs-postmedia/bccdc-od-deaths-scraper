@@ -1,12 +1,7 @@
+from asyncore import file_dispatcher
 from operator import index
 import pandas as pd
 from tabula import read_pdf
-# from geopandas import gpd
-
-# from shapely.geometry import shape
-# import json
-# from glom import glom
-
 
 # VARS
 current_year = '2021'
@@ -15,8 +10,9 @@ city_pop = './data/source/city-populations.csv'
 # why this agent? who knows...
 user_agent_string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 
+
 ### INPUTS ### 
-file_path = '../pdfs/illicit-drug.pdf'
+file_path = './data/source/illicit-drug.pdf'
 deaths_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
 # drugs_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug-type.pdf'
 
@@ -28,8 +24,7 @@ age_deaths_path = './data/deaths-by-age.csv'
 city_deaths_path = './data/deaths-by-city.csv'
 monthly_deaths_path = './data/monthly-deaths.csv'
 yearly_deaths_path = './data/yearly-deaths.csv'
-
-
+ha_location_deaths_path = './data/ha-location-deaths.csv'
 
 
 # FUNCTIONS
@@ -150,8 +145,6 @@ def scrapeAges(input_file, output_file):
     # write CSV file
     df_sum.to_csv(output_file, index=False)
 
-
-
 def scrapeLHA(input_file, json_output, csv_output):
     # admin boundaries for LHAs
     lha_df = gpd.read_file(lha_geo_path)
@@ -206,13 +199,41 @@ def scrapeLHA(input_file, json_output, csv_output):
     df = df.rename(columns={'LHA_NAME':'Local Health Area'})
     df.to_csv(csv_output, index=False)
 
+def scrapeHaLocation(input_file, output_file):
+     # read city deaths table from PDF
+    df = read_pdf(input_file, output_format="dataframe", pages='5', stream=True, multiple_tables=True, user_agent=user_agent_string, area=[401,48.84,518.20,552.58])
+
+    # clean this fugly sh*t
+    # list to dataframe & drop NaN
+    df = df[0].dropna()
+    # rename columns
+    df.rename(columns = {'Unnamed: 0':'Location', 'Interior':'Interior', 'Fraser':'Fraser', 'Unnamed: 3':'VCH', 'Unnamed: 4':'Island', 'Northern':'Northern'}, inplace = True)
+
+    # Clean up location names
+    df['Location'].replace('Other Residence', 'Hotel, SRO, etc.', inplace = True)
+    df['Location'].replace('Private Residence', 'Private home', inplace = True)
+    df['Location'].replace('Other Inside', 'Indoors, non-residential', inplace = True)
+
+    # we only want the % value (yes, I know there's a better way to do this... :P)
+    df['Interior'] = df['Interior'].str.replace('%)', '', regex = False).str.replace('^.*\s[(]', '', regex = True)
+    df['Fraser'] = df['Fraser'].str.replace('%)', '', regex = False).str.replace('^.*\s[(]', '', regex = True)
+    df['VCH'] = df['VCH'].str.replace('%)', '', regex = False).str.replace('^.*\s[(]', '', regex = True)
+    df['Island'] = df['Island'].str.replace('%)', '', regex = False).str.replace('^.*\s[(]', '', regex = True)
+    df['Northern'] = df['Northern'].str.replace('%)', '', regex = False).str.replace('^.*\s[(]', '', regex = True)
+
+    print(df)
+
+    # write CSV file
+    df.to_csv(output_file, index=False)
 
 
 # AUTOBOTS... ROLL OUT!!!
+# scrapeAges(deaths_url, age_deaths_path)
+# scrapeCityDeaths(deaths_url, city_deaths_path)
 # scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
-scrapeCityDeaths(deaths_url, city_deaths_path)
-scrapeAges(deaths_url, age_deaths_path)
+scrapeHaLocation(file_path, ha_location_deaths_path)
 # more scrapers here...
+# LHA doesn't quite work using tableau.py
 # scrapeLHA(file_path, lha_json_path, lha_csv_path)
 
 print('DONE!!!')
