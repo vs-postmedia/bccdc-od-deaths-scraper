@@ -106,31 +106,15 @@ def scrapeCityDeaths(input_file, output_file):
     # NOTE: HAVE TO WRITE FILE FOR DF_MAP
 
 def scrapeAges(input_file, output_file):
-    # read city deaths table from PDF
-    df = read_pdf(input_file, output_format="dataframe", pages='8', stream=True, multiple_tables=True, user_agent=user_agent_string) # area=[549,52.5,354,703])
+    # read age by year
+    df = read_pdf(input_file, output_format="dataframe", pages='8', stream=True, multiple_tables=False, user_agent=user_agent_string, area=[542.74,35.05,684.72,568.67])
 
-    # drop "total" & "unknown" rows
-    df = df[0].iloc[:-2].iloc[10:]
-    # some fugly cleanup
-    df = df.dropna(axis=1)
-    # rename columns
-    df.rename(columns = {'2012':'2019', '2013':'2020', '2014':'2021','2015':'2022'}, inplace = True)
+    # df comes as list, we won't want that
+    df = df[0]
+
     # the space in "Age Group" will cause trouble later on
-    df['Sex'] = df['Sex'].str.replace('Age Group', 'Age')
-    # separate the first column with is all mashed together & split it to separate columns
-    df_tmp = df.iloc[:,:1]
-    df_tmp[['Age','2012','2013','2014','2015','2016','2017','2018']] = df_tmp['Sex'].str.split(' ', expand=True)
-    # drop unused col
-    df_tmp.drop(['Sex'], axis=1, inplace=True)
-    
-    # merge two dfs
-    df_tmp['2019'] = pd.Series(df['2019'])
-    df_tmp['2020'] = pd.Series(df['2020'])
-    df_tmp['2021'] = pd.Series(df['2021'])
-    df_tmp['2022'] = pd.Series(df['2022'])
-
-    # Copy edits to data
-    df = df_tmp.drop(index = df_tmp[df_tmp['Age'] == 'Age'].index)
+    df.rename(columns = {'Age Group': 'Age'}, inplace=True)
+    # rename
     df['Age'] = df['Age'].str.replace('<19', 'Under 19')
     
     # Sum by age
@@ -207,7 +191,6 @@ def scrapeHaLocation(input_file, output_file):
     # list to dataframe & drop NaN
     df = df[0].dropna()
 
-    print(df)
     # rename columns
     df.rename(columns = {'Unnamed: 0':'Location', 'Interior':'Interior', 'Fraser':'Fraser', 'Unnamed: 3':'VCH', 'Unnamed: 4':'Island', 'Unnamed: 5':'Northern'}, inplace = True)
 
@@ -216,8 +199,6 @@ def scrapeHaLocation(input_file, output_file):
     df['Location'].replace('Private Residence', 'Private home', inplace = True)
     df['Location'].replace('Other Inside', 'Indoors, non-residential', inplace = True)
 
-
-    print(df)
     # we only want the % value (yes, I know there's a better way to do this... :P)
     df['Interior'] = df['Interior'].str.replace('%)', '', regex = False).str.replace('^.*\s[(]', '', regex = True)
     df['Fraser'] = df['Fraser'].str.replace('%)', '', regex = False).str.replace('^.*\s[(]', '', regex = True)
@@ -234,8 +215,9 @@ scrapeAges(deaths_url, age_deaths_path)
 scrapeCityDeaths(deaths_url, city_deaths_path)
 scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
 scrapeHaLocation(deaths_url, ha_location_deaths_path)
-# more scrapers here...
 # LHA doesn't quite work using tableau.py
 # scrapeLHA(file_path, lha_json_path, lha_csv_path)
+# more scrapers here...
+
 
 print('DONE!!!')
