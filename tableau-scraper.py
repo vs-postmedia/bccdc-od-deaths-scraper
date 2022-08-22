@@ -1,4 +1,4 @@
-from tableauscraper import TableauScraper as TS
+from tableauscraper import TableauScraper as TS/vs-postmedia
 import pandas as pd
 
 
