@@ -4,7 +4,7 @@ import pandas as pd
 from tabula import read_pdf
 
 # VARS
-current_year = '2021'
+current_year = '2022'
 lha_geo_path = './data/source/lha-2018-epsg4326_7pct.json'
 city_pop = './data/source/city-populations.csv'
 # why this agent? who knows...
@@ -13,6 +13,7 @@ user_agent_string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/
 
 ### INPUTS ### 
 # file_path = './data/source/illicit-drug.pdf'
+file_path = './data/source/illicit-drug-june30.pdf'
 deaths_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
 # drugs_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug-type.pdf'
 
@@ -45,8 +46,6 @@ def scrapeDeathsTimeseries(input_file, monthly_output, yearly_output):
     
     # write to file
     df_totals.to_csv(yearly_output, index=False)
-
-    
 
     ### MONTHLY ###
     # drop "total" & "average" rows
@@ -107,14 +106,17 @@ def scrapeCityDeaths(input_file, output_file):
 
 def scrapeAges(input_file, output_file):
     # read age by year
-    df = read_pdf(input_file, output_format="dataframe", pages='8', stream=True, multiple_tables=False, user_agent=user_agent_string, area=[542.74,35.05,684.72,568.67])
+    #   https://tabula-py.readthedocs.io/en/latest/faq.html#how-can-i-ignore-useless-area
+    # area = [542.74,35.05,684.72,568.67]
+    area = [560,35.05,690,568.67]
+    df = read_pdf(input_file, output_format="dataframe", pages='8', stream=True, multiple_tables=False, user_agent=user_agent_string, area=area)
+    # df = read_pdf(input_file, output_format="dataframe", pages='8', stream=True, multiple_tables=True, user_agent=user_agent_string)
 
-    # df comes as list, we won't want that
+    # df comes as list, we don't want that
     df = df[0]
 
     # the space in "Age Group" will cause trouble later on
     df.rename(columns = {'Age Group': 'Age'}, inplace=True)
-    # rename
     df['Age'] = df['Age'].str.replace('<19', 'Under 19')
     
     # Sum by age
@@ -211,6 +213,7 @@ def scrapeHaLocation(input_file, output_file):
 
 
 # AUTOBOTS... ROLL OUT!!!
+# scrapeAges(file_path, age_deaths_path)
 scrapeAges(deaths_url, age_deaths_path)
 scrapeCityDeaths(deaths_url, city_deaths_path)
 scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
