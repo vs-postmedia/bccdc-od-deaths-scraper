@@ -1,6 +1,8 @@
 from asyncore import file_dispatcher
+from cmath import nan
 from operator import index
 import pandas as pd
+import geopandas as gpd
 from tabula import read_pdf
 
 # VARS
@@ -10,6 +12,8 @@ city_pop = './data/source/city-populations.csv'
 # why this agent? who knows...
 user_agent_string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 
+# TABLE AREAS
+lha_area = [150,32,720,568]
 
 ### INPUTS ### 
 # file_path = './data/source/illicit-drug.pdf'
@@ -133,56 +137,47 @@ def scrapeAges(input_file, output_file):
 
 def scrapeLHA(input_file, json_output, csv_output):
     # admin boundaries for LHAs
-    lha_df = gpd.read_file(lha_geo_path)
+    lha_json = gpd.read_file(lha_geo_path)
 
     # read LHA tables from PDF
-    dfx = read_pdf(input_file, output_format="json", pages="19", stream=True, area=[180,31,715,572])
+    df = read_pdf(input_file, output_format="dataframe", pages="18-20", stream=True, area=lha_area, user_agent=user_agent_string)
+
+    # df comes as list, we don't want that
+    df = df[0]
     
-    with open('./data/test.json', 'w') as f:
-        json.dump(dfx, f)
+    # add headers to dataframe
+    df.columns = ['LHA_NAME', '2017', '2018', '2019', '2020', '2021', '2022', 'deaths']
 
-    
-    # convert json into dataframe
-    df1 = pd.json_normalize(dfx, record_path=['data'][0])
-    print(df1[0][17])
-
-    df1.to_csv('./data/test.csv')
-
-    
-
-
-    df1 = read_pdf(input_file, output_format="dataframe", pages='19', pandas_options={'header': None, 'names':['LHA_NAME','2016','2017','2018','2019','2020','2021','Deaths this year']}, stream=True, area=[180,31,715,572])
-    df2 = read_pdf(input_file, output_format="dataframe", pages='20', pandas_options={'header': None, 'names':['LHA_NAME','2016','2017','2018','2019','2020','2021','Deaths this year']}, stream=True, area=[180,31,400,572])
-    
     # drop non-data rows
-    df1 = df1[0].iloc[:-16]
-    df2 = df2[0]
+    df['LHA_NAME'].replace('', nan, inplace = True)
+    df.dropna(subset = ['LHA_NAME'], inplace = True)
+    # df.drop(index=[0,1], inplace = True)
+    df.drop(df.tail(16).index, inplace = True)
 
-    df1.to_csv('./data/test.csv')
- 
+    # some zeros end up as NaN, for some reason <shrug>
+    df['deaths'] = df['deaths'].fillna(0)
+
+
     # text cleanup
-    df1['LHA_NAME'] = df1['LHA_NAME'].str.replace('Maple Ridge/Pitt', 'Maple Ridge/Pitt Meadows')
-    df2['LHA_NAME'] = df2['LHA_NAME'].str.replace('West Vancouver/ Bowen', 'West Vancouver & Bowen Island')
-
-    df1.drop(index = df1[df1['LHA_NAME'] == 'Meadows'].index, inplace=True)
-    df2.drop(index = df2[df2['LHA_NAME'] == 'Island'].index, inplace=True)
-
-    # concat results from all 3 df pages
-    df = pd.concat([df1, df2], axis=0)
-
-    lha = ['Gulf']
-    print(df1[df1['LHA_NAME'].isin(lha)])
+    df['LHA_NAME'] = df['LHA_NAME'].str.replace('Maple Ridge/Pitt', 'Maple Ridge/Pitt Meadows')
+    df['LHA_NAME'] = df['LHA_NAME'].str.replace('West Vancouver/ Bowen', 'West Vancouver & Bowen Island')
+    df.drop(index = df[df['LHA_NAME'] == 'Meadows'].index, inplace=True)
+    df.drop(index = df[df['LHA_NAME'] == 'Island'].index, inplace=True)
 
     # merge with LHA boundaries
-    df_current = df[['LHA_NAME', current_year, 'Deaths this year']]
-    df_geo = lha_df.merge(df_current, on='LHA_NAME', how='left')
-    df_geo.fillna('', inplace=True)
+    # df_current = df[['LHA_NAME', current_year, 'Deaths this year']]
+    df_geo = lha_json.merge(df, on='LHA_NAME', how='left')
+    df_geo.fillna('', inplace=True) 
 
     # write geojson file
     df_geo.to_file(json_output, driver='GeoJSON', drop_id=True)
 
-    # rename columns & write CSV file
-    df = df.rename(columns={'LHA_NAME':'Local Health Area'})
+    # prep csv output for the table
+    df['Deaths per 100k, ’22'] = df.loc[:, '2022']
+    df = df[['LHA_NAME', '2017', '2018', '2019', '2020', '2021', '2022', 'Deaths per 100k, ’22', 'deaths']]
+    
+    # write CSV file
+    df = df.rename(columns={'LHA_NAME':'Local Health Area', 'deaths': 'Deaths, ’22'})
     df.to_csv(csv_output, index=False)
 
 def scrapeHaLocation(input_file, output_file):
@@ -213,11 +208,13 @@ def scrapeHaLocation(input_file, output_file):
 
 
 # AUTOBOTS... ROLL OUT!!!
-# scrapeAges(file_path, age_deaths_path)
+scrapeAges(deaths_url, age_deaths_path)
 scrapeAges(deaths_url, age_deaths_path)
 scrapeCityDeaths(deaths_url, city_deaths_path)
 scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
 scrapeHaLocation(deaths_url, ha_location_deaths_path)
+scrapeLHA(deaths_url, lha_json_path, lha_csv_path)
+
 # LHA doesn't quite work using tableau.py
 # scrapeLHA(file_path, lha_json_path, lha_csv_path)
 # more scrapers here...
