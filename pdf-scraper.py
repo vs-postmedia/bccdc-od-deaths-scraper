@@ -89,8 +89,12 @@ def scrapeCityDeaths(input_file, timeseries_output_file, latest_year_output_file
 
     # drop "total" & "other" rows/vs-postmedia/bccdc-od-deaths-scraper/raw/main/data/deaths-by-city.csv
     df = df[0].iloc[:-2]
+    
     # rename township
     df.rename(columns = {'Township':'City'}, inplace = True)
+
+    # rename Victoria  
+    df.replace(to_replace = 'Greater Victoria', value = 'Victoria', inplace = True)
    
     # wide to long 
     df_long = df.melt(id_vars='City', var_name='Year', value_name='Deaths', ignore_index=True)
@@ -213,13 +217,13 @@ def scrapeHaLocation(input_file, output_file):
 
 
 # AUTOBOTS... ROLL OUT!!!
-scrapeAges(deaths_url, age_deaths_path)
-scrapeCityDeaths(deaths_url, city_deaths_ts_path, city_deaths_latest_path)
-scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
-scrapeHaLocation(deaths_url, ha_location_deaths_path)
-scrapeLHA(deaths_url, lha_json_path, lha_csv_path)
+# scrapeAges(deaths_url, age_deaths_path)
+# scrapeCityDeaths(deaths_url, city_deaths_ts_path, city_deaths_latest_path)
+# scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
+# scrapeHaLocation(deaths_url, ha_location_deaths_path)
+# scrapeLHA(deaths_url, lha_json_path, lha_csv_path)
 
 # TEST SCRAPERS HERE....
-# scrapeCityDeaths(file_path, city_deaths_ts_path, city_deaths_latest_path)
+scrapeCityDeaths(file_path, city_deaths_ts_path, city_deaths_latest_path)
 
 print('DONE!!!')
