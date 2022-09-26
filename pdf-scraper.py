@@ -17,22 +17,25 @@ lha_area = [150,32,720,568]
 
 ### INPUTS ### 
 # file_path = './data/source/illicit-drug.pdf'
-file_path = './data/source/illicit-drug-june30.pdf'
+file_path = './data/source/illicit-drug.pdf'
 deaths_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
 # drugs_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug-type.pdf'
 
 
 ### OUTPUT FILES ###
-lha_csv_path = './data/deaths-by-lha.csv'
-lha_json_path = './data/deaths-by-lha.json'
-age_deaths_path = './data/deaths-by-age.csv'
-city_deaths_path = './data/deaths-by-city.csv'
-monthly_deaths_path = './data/monthly-deaths.csv'
-yearly_deaths_path = './data/yearly-deaths.csv'
-ha_location_deaths_path = './data/ha-location-deaths.csv'
+lha_csv_path = './data/deaths-by-lha.csv' # LHA table
+lha_json_path = './data/deaths-by-lha.json' # LHA map
+age_deaths_path = './data/deaths-by-age.csv' # total deaths by age group
+city_deaths_ts_path = './data/deaths-by-city.csv' # timeseries of death rates for key cities
+city_deaths_latest_path = './data/deaths-by-city-latest.csv' # total deaths for current year
+monthly_deaths_path = './data/monthly-deaths.csv' # monthly deaths (unused)
+yearly_deaths_path = './data/yearly-deaths.csv' # annual deaths
+ha_location_deaths_path = './data/ha-location-deaths.csv' # private resident, SRO, etc
 
 
 # FUNCTIONS
+
+# deaths per year & per year (separate files)
 def scrapeDeathsTimeseries(input_file, monthly_output, yearly_output):
     df = read_pdf(input_file, output_format="dataframe", pages='4', stream=True, area=[76,52.5,355,589], user_agent=user_agent_string)
     df = df[0]
@@ -48,7 +51,7 @@ def scrapeDeathsTimeseries(input_file, monthly_output, yearly_output):
     # drop unused col
     df_totals.drop(['Month'], axis=1, inplace=True)
     
-    # write to file
+    # write anual totals to file
     df_totals.to_csv(yearly_output, index=False)
 
     ### MONTHLY ###
@@ -74,11 +77,11 @@ def scrapeDeathsTimeseries(input_file, monthly_output, yearly_output):
     # reorder columns
     df = df[['Date', 'Deaths']]
     
-    # print(df)
     # write to file
     df.to_csv(monthly_output, index=False)
 
-def scrapeCityDeaths(input_file, output_file):
+# UNUSED: For small-multiple timeseries for key B.C. cities
+def scrapeCityDeaths(input_file, timeseries_output_file, latest_year_output_file):
     # get city populations
     pop = pd.read_csv(city_pop)
     # read city deaths table from PDF
@@ -102,12 +105,13 @@ def scrapeCityDeaths(input_file, output_file):
     df_wide = df_wide.transpose()
 
     # we only want the latest year for the LHA map
-    # df_long = df_long[df_long['Year'] == '2022']
+    df_long = df_long[df_long['Year'] == '2022']
 
-    # write csv file
-    df_wide.to_csv(output_file)
-    # NOTE: HAVE TO WRITE FILE FOR DF_MAP
+    # write csv files
+    df_wide.to_csv(timeseries_output_file)
+    df_long.to_csv(latest_year_output_file)
 
+# get total number of deaths by age group
 def scrapeAges(input_file, output_file):
     # read age by year
     #   https://tabula-py.readthedocs.io/en/latest/faq.html#how-can-i-ignore-useless-area
@@ -135,6 +139,7 @@ def scrapeAges(input_file, output_file):
     # write CSV file
     df_sum.to_csv(output_file, index=False)
 
+# deaths per LHA: geojson for map, csv for table
 def scrapeLHA(input_file, json_output, csv_output):
     # admin boundaries for LHAs
     lha_json = gpd.read_file(lha_geo_path)
@@ -156,7 +161,6 @@ def scrapeLHA(input_file, json_output, csv_output):
 
     # some zeros end up as NaN, for some reason <shrug>
     df['deaths'] = df['deaths'].fillna(0)
-
 
     # text cleanup
     df['LHA_NAME'] = df['LHA_NAME'].str.replace('Maple Ridge/Pitt', 'Maple Ridge/Pitt Meadows')
@@ -180,6 +184,7 @@ def scrapeLHA(input_file, json_output, csv_output):
     df = df.rename(columns={'LHA_NAME':'Local Health Area', 'deaths': 'Total deaths'})
     df.to_csv(csv_output, index=False)
 
+# deaths by location (private residence, SRO, etc.)
 def scrapeHaLocation(input_file, output_file):
      # read city deaths table from PDF
     df = read_pdf(input_file, output_format="dataframe", pages='5', stream=True, multiple_tables=True, user_agent=user_agent_string, area=[401,48.84,518.20,552.58])
@@ -209,15 +214,12 @@ def scrapeHaLocation(input_file, output_file):
 
 # AUTOBOTS... ROLL OUT!!!
 scrapeAges(deaths_url, age_deaths_path)
-scrapeAges(deaths_url, age_deaths_path)
-scrapeCityDeaths(deaths_url, city_deaths_path)
+scrapeCityDeaths(deaths_url, city_deaths_ts_path, city_deaths_latest_path)
 scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
 scrapeHaLocation(deaths_url, ha_location_deaths_path)
 scrapeLHA(deaths_url, lha_json_path, lha_csv_path)
 
-# LHA doesn't quite work using tableau.py
-# scrapeLHA(file_path, lha_json_path, lha_csv_path)
-# more scrapers here...
-
+# TEST SCRAPERS HERE....
+# scrapeCityDeaths(file_path, city_deaths_ts_path, city_deaths_latest_path)
 
 print('DONE!!!')
