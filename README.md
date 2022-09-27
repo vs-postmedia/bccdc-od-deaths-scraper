@@ -10,15 +10,20 @@ the B.C. Coroners’s Service illicit drug deaths at:
 
 View the tracker here: https://vs-postmedia.github.io/od-tracker 
 
-Data dict instructions:
+Data update instructions:
 1. run pdf & tableau scrapers
 
 <!-- MANUAL (just for now, I hope!) -->
-Illicit drug type report:
-• deaths w/ fentanyl detected (annual) (fig.1)
-• extreme fentanyl concentrations (monthly) (fig.2)
-• expidited toxicology results (monthly) (fig.5)
+_ILLICIT DRUG REPORT:_
+• *big_num*: Summary text, grafs 1 & 2
+    • deaths_total = deaths_total + deaths_new
+
+_ILLICIT DRUG TYPE REPORT:_
+• *fentanyl_year*: deaths w/ fentanyl detected (annual) (fig.1)
+• *fentanyl_extreme*: extreme fentanyl concentrations (monthly) (fig.2)
 • **carfentanyl – currently not used (monthly) (fig.4)**
+• *drug_types_long*: expidited toxicology results (monthly) (fig.5)
+
 • URL: https://docs.google.com/spreadsheets/d/1bk3cOdwsUuK7CxUdsQUcng78H3cDd-QNTqPMa2Lw790/edit#gid=440911543 
 
 Illicit drug toxicity report
