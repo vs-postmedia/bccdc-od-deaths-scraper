@@ -112,8 +112,8 @@ def scrapeCityDeaths(input_file, timeseries_output_file, latest_year_output_file
     df_long = df_long[df_long['Year'] == '2022']
 
     # write csv files
-    df_wide.to_csv(timeseries_output_file)
-    df_long.to_csv(latest_year_output_file)
+    df_wide.to_csv(timeseries_output_file, index=False)
+    df_long.to_csv(latest_year_output_file, index=False)
 
 # get total number of deaths by age group
 def scrapeAges(input_file, output_file):
@@ -217,13 +217,13 @@ def scrapeHaLocation(input_file, output_file):
 
 
 # AUTOBOTS... ROLL OUT!!!
-# scrapeAges(deaths_url, age_deaths_path)
-# scrapeCityDeaths(deaths_url, city_deaths_ts_path, city_deaths_latest_path)
-# scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
-# scrapeHaLocation(deaths_url, ha_location_deaths_path)
-# scrapeLHA(deaths_url, lha_json_path, lha_csv_path)
+scrapeAges(deaths_url, age_deaths_path)
+scrapeCityDeaths(deaths_url, city_deaths_ts_path, city_deaths_latest_path)
+scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
+scrapeHaLocation(deaths_url, ha_location_deaths_path)
+scrapeLHA(deaths_url, lha_json_path, lha_csv_path)
 
 # TEST SCRAPERS HERE....
-scrapeCityDeaths(file_path, city_deaths_ts_path, city_deaths_latest_path)
+# scrapeCityDeaths(file_path, city_deaths_ts_path, city_deaths_latest_path)
 
 print('DONE!!!')
