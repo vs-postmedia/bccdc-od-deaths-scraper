@@ -13,11 +13,11 @@ city_pop = './data/source/city-populations.csv'
 user_agent_string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 
 # TABLE AREAS
-#   https://tabula-py.readthedocs.io/en/latest/faq.html#how-can-i-ignore-useless-area
+# https://tabula-py.readthedocs.io/en/latest/faq.html#how-can-i-ignore-useless-area
 lha_area = [150,32,720,568]
 ages_area = [540,35.05,690,568.67]
 
-### INPUTS ### 
+### INPUTS ###
 file_path = './data/source/illicit-drug.pdf'
 deaths_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
 # drugs_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug-type.pdf'
@@ -80,8 +80,8 @@ def scrapeDeathsTimeseries(input_file, monthly_output, yearly_output):
     # write to file
     df.to_csv(monthly_output, index=False)
 
-# UNUSED: For small-multiple timeseries for key B.C. cities
-def scrapeCityDeaths(input_file, timeseries_output_file, latest_year_output_file):
+# UNUSED IN VIZ: For small-multiple timeseries for key B.C. cities
+def scrapeCityDeaths(input_file, timeseries_output_file):
     # get city populations
     pop = pd.read_csv(city_pop)
     # read city deaths table from PDF
@@ -95,7 +95,7 @@ def scrapeCityDeaths(input_file, timeseries_output_file, latest_year_output_file
 
     # rename Victoria  
     df.replace(to_replace = 'Greater Victoria', value = 'Victoria', inplace = True)
-   
+    
     # wide to long 
     df_long = df.melt(id_vars='City', var_name='Year', value_name='Deaths', ignore_index=True)
     # add population column
@@ -108,12 +108,8 @@ def scrapeCityDeaths(input_file, timeseries_output_file, latest_year_output_file
     df_wide = df_long.pivot(index='City', columns='Year', values='Deaths per 100,000')
     df_wide = df_wide.transpose()
 
-    # we only want the latest year for the LHA map
-    df_long = df_long[df_long['Year'] == '2022']
-
     # write csv files
-    df_wide.to_csv(timeseries_output_file, index=False)
-    df_long.to_csv(latest_year_output_file, index=False)
+    df_wide.to_csv(timeseries_output_file)
 
 # get total number of deaths by age group
 def scrapeAges(input_file, output_file):
@@ -215,13 +211,13 @@ def scrapeHaLocation(input_file, output_file):
 def scrapePDF():
     # AUTOBOTS... ROLL OUT!!!
     scrapeAges(deaths_url, age_deaths_path)
-    scrapeCityDeaths(deaths_url, city_deaths_ts_path, city_deaths_latest_path)
+    scrapeCityDeaths(deaths_url, city_deaths_ts_path)
     scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
     scrapeHaLocation(deaths_url, ha_location_deaths_path)
     scrapeLHA(deaths_url, lha_json_path, lha_csv_path)
 
 # TEST SCRAPERS HERE....
-# scrapeAges(file_path, age_deaths_path)
+# scrapeCityDeaths(deaths_url, city_deaths_ts_path)
 
 print('DONE!!!')
 
