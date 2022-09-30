@@ -13,10 +13,11 @@ city_pop = './data/source/city-populations.csv'
 user_agent_string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
 
 # TABLE AREAS
+#   https://tabula-py.readthedocs.io/en/latest/faq.html#how-can-i-ignore-useless-area
 lha_area = [150,32,720,568]
+ages_area = [540,35.05,690,568.67]
 
 ### INPUTS ### 
-# file_path = './data/source/illicit-drug.pdf'
 file_path = './data/source/illicit-drug.pdf'
 deaths_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
 # drugs_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug-type.pdf'
@@ -33,9 +34,8 @@ yearly_deaths_path = './data/yearly-deaths.csv' # annual deaths
 ha_location_deaths_path = './data/ha-location-deaths.csv' # private resident, SRO, etc
 
 
-# FUNCTIONS
-
-# deaths per year & per year (separate files)
+### FUNCTIONS ###
+# deaths per month & per year (separate files)
 def scrapeDeathsTimeseries(input_file, monthly_output, yearly_output):
     df = read_pdf(input_file, output_format="dataframe", pages='4', stream=True, area=[76,52.5,355,589], user_agent=user_agent_string)
     df = df[0]
@@ -118,17 +118,14 @@ def scrapeCityDeaths(input_file, timeseries_output_file, latest_year_output_file
 # get total number of deaths by age group
 def scrapeAges(input_file, output_file):
     # read age by year
-    #   https://tabula-py.readthedocs.io/en/latest/faq.html#how-can-i-ignore-useless-area
-    # area = [542.74,35.05,684.72,568.67]
-    area = [560,35.05,690,568.67]
-    df = read_pdf(input_file, output_format="dataframe", pages='8', stream=True, multiple_tables=False, user_agent=user_agent_string, area=area)
-    # df = read_pdf(input_file, output_format="dataframe", pages='8', stream=True, multiple_tables=True, user_agent=user_agent_string)
+    df = read_pdf(input_file, output_format="dataframe", pages='8', stream=True, multiple_tables=False, user_agent=user_agent_string, area=ages_area)
 
     # df comes as list, we don't want that
     df = df[0]
 
     # the space in "Age Group" will cause trouble later on
     df.rename(columns = {'Age Group': 'Age'}, inplace=True)
+    # print(df)
     df['Age'] = df['Age'].str.replace('<19', 'Under 19')
     
     # Sum by age
@@ -215,15 +212,18 @@ def scrapeHaLocation(input_file, output_file):
     # write CSV file
     df.to_csv(output_file, index=False)
 
-
-# AUTOBOTS... ROLL OUT!!!
-scrapeAges(deaths_url, age_deaths_path)
-scrapeCityDeaths(deaths_url, city_deaths_ts_path, city_deaths_latest_path)
-scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
-scrapeHaLocation(deaths_url, ha_location_deaths_path)
-scrapeLHA(deaths_url, lha_json_path, lha_csv_path)
+def scrapePDF():
+    # AUTOBOTS... ROLL OUT!!!
+    scrapeAges(deaths_url, age_deaths_path)
+    scrapeCityDeaths(deaths_url, city_deaths_ts_path, city_deaths_latest_path)
+    scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
+    scrapeHaLocation(deaths_url, ha_location_deaths_path)
+    scrapeLHA(deaths_url, lha_json_path, lha_csv_path)
 
 # TEST SCRAPERS HERE....
-# scrapeCityDeaths(file_path, city_deaths_ts_path, city_deaths_latest_path)
+# scrapeAges(file_path, age_deaths_path)
 
 print('DONE!!!')
+
+
+scrapePDF()
