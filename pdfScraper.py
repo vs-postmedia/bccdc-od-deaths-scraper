@@ -15,7 +15,8 @@ user_agent_string = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/
 # TABLE AREAS
 # https://tabula-py.readthedocs.io/en/latest/faq.html#how-can-i-ignore-useless-area
 lha_area = [150,32,720,568]
-ages_area = [540,35.05,690,568.67]
+ages_area_v1 = [540,35.05,690,568.67]
+ages_area_v2 = [560,35.05,690,568.67]
 
 ### INPUTS ###
 file_path = './data/source/illicit-drug.pdf'
@@ -113,11 +114,18 @@ def scrapeCityDeaths(input_file, timeseries_output_file):
 
 # get total number of deaths by age group
 def scrapeAges(input_file, output_file):
-    # read age by year
-    df = read_pdf(input_file, output_format="dataframe", pages='8', stream=True, multiple_tables=False, user_agent=user_agent_string, area=ages_area)
-
-    # df comes as list, we don't want that
-    df = df[0]
+    # read age by year...
+    # BUT...
+    # the position of the age table shifts from report to report...
+    df1 = read_pdf(input_file, output_format="dataframe", pages='8', stream=True, multiple_tables=False, user_agent=user_agent_string, area=ages_area_v1)
+    df2 = read_pdf(input_file, output_format="dataframe", pages='8', stream=True, multiple_tables=False, user_agent=user_agent_string, area=ages_area_v2)
+    
+    if list(df1[0].columns)[0] == 'Age Group':
+        # df comes as list, we don't want that
+        df = df1[0]
+    else:
+        # df comes as list, we don't want that
+        df = df2[0]
 
     # the space in "Age Group" will cause trouble later on
     df.rename(columns = {'Age Group': 'Age'}, inplace=True)
