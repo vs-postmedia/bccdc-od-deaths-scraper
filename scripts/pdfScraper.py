@@ -1,3 +1,5 @@
+''' pdfScraper.py '''
+
 from asyncore import file_dispatcher
 from cmath import nan
 from operator import index
@@ -216,18 +218,14 @@ def scrapeHaLocation(input_file, output_file):
     # write CSV file
     df.to_csv(output_file, index=False)
 
-def scrapePDF():
+def init():
     # AUTOBOTS... ROLL OUT!!!
     scrapeAges(deaths_url, age_deaths_path)
     scrapeCityDeaths(deaths_url, city_deaths_ts_path)
     scrapeDeathsTimeseries(deaths_url, monthly_deaths_path, yearly_deaths_path)
     scrapeHaLocation(deaths_url, ha_location_deaths_path)
     scrapeLHA(deaths_url, lha_json_path, lha_csv_path)
+    print('PDF DONE!!!')
 
 # TEST SCRAPERS HERE....
 # scrapeCityDeaths(deaths_url, city_deaths_ts_path)
-
-print('DONE!!!')
-
-
-scrapePDF()

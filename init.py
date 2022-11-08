@@ -1,3 +1,6 @@
-import pdfScraper
+import scripts.pdfScraper as pdfScraper
+import scripts.tableauScraper as tableauScraper
 
-print(pdfScraper.scrapePDF())
+pdfScraper.init()
+tableauScraper.init()
+
