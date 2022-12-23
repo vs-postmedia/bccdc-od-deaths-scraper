@@ -184,8 +184,8 @@ def scrapeLHA(input_file, json_output, csv_output):
     df_geo.to_file(json_output, driver='GeoJSON', drop_id=True)
 
     # prep csv output for the table
-    df['Rate per 1,000'] = df.loc[:, '2022']
-    df = df[['LHA_NAME', '2017', '2018', '2019', '2020', '2021', '2022', 'Rate per 1,000', 'deaths']]
+    df['Rate per 100,000'] = df.loc[:, '2022']
+    df = df[['LHA_NAME', '2017', '2018', '2019', '2020', '2021', '2022', 'Rate per 100,000', 'deaths']]
     
     # write CSV file
     df = df.rename(columns={'LHA_NAME':'Local Health Area', 'deaths': 'Total deaths'})
