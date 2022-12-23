@@ -8,21 +8,28 @@ import pandas as pd
 # rate is per 100k population
 
 # VARS
-paramedic_sheet = 'Paramedic Rate Attended' # 'Illegal ODs and Projected'
-od_sheet = 'BCCS Deaths Sex-Age' # 'BCCS Deaths Rate'
+# paramedic_sheet = 'Paramedic Rate Attended' # 'Illegal ODs and Projected'
+paramedic_sheet = 'Paramedic Attended (2)'
+# od_sex_sheet = 'BCCS Deaths Sex-Age' # 'BCCS Deaths Rate'
+# od_sex_sheet = 'Paramedic Attended Sex-Age (2)'
+# od_sex_sheet = 'Illicit Drug Toxicity Deaths '
+od_sex_sheet = 'BCCS Deaths Rate (2)'
+od_sheet = 'Illicit Drug Toxicity Deaths '
 ops_sheet = 'OPS Visits' #OPS Inhalation Visits, OPS Overdose
-
 haList = ['All BC', 'Interior', 'Fraser', 'Vancouver Coastal', 'Vancouver Island', 'Northern']
 
 # OUTPUT FILES
 paramedic_output = './data/paramedic-calls.csv'
-deaths_output = './data/deaths-by-sex.csv'
+od_sex_output = './data/deaths-by-sex.csv'
 ops_output = './data/ops-visits.csv'
 
 # SOURCE DATA
-od_url = 'https://public.tableau.com/views/ODQuarterlyReportDashboard/IllicitOverdoseDeathsIndicator'
-paramedic_url = 'https://public.tableau.com/views/ODQuarterlyReportDashboard/ParamedicAttendedOverdoseIndicator2'
+# od_url = 'https://public.tableau.com/views/ODQuarterlyReportDashboard/IllicitOverdoseDeathsIndicator'
 ops_url = 'https://public.tableau.com/views/ODQuarterlyReportDashboard/OPSSitesIndicators'
+od_sex_url = 'http://public.tableau.com/views/UnregulatedDrugPoisoningEmergencyDashboard/Introduction'
+paramedic_url = 'http://public.tableau.com/views/UnregulatedDrugPoisoningEmergencyDashboard/Introduction'
+
+
 
 # GET TO WORK!
 ts = TS()
@@ -30,48 +37,66 @@ ts = TS()
 ### FUNCTIONS ###
 def scrapeDeathsBySexHA(url, sheet, output_file):
     ts.loads(url)
+    wb = ts.getWorkbook()
     df_all = pd.DataFrame()
-    ws = ts.getWorksheet(sheet)
+    # print(wb.getSheets())
+    ws = wb.goToSheet(sheet)
 
-    # workbook = ts.getWorkbook()
-    # for t in workbook.worksheets:
-    #     print(f"worksheet name : {t.name}") #show worksheet names
+    
+    for t in ws.worksheets:
+        # print(t.name)
+        # if t.name == sheet:
+        if t.name == 'BCCS Deaths Rate (2)':
+            # df = pd.DataFrame(data = t.data)
+            print(t.getFilters())
 
-    # get filter columns & values
-    # filters = ws.getFilters()
-    # print(filters)
+            for ha in haList:
+                # set filter value
+                wb = t.setFilter('HA Name1', ha, filterDelta=False)
+                filtered_data = wb.getWorksheet('BCCS Deaths Rate (2)')
+                df = pd.DataFrame(data = filtered_data.data)
+                df = df.loc[:,~df.columns.str.contains('alias', case=False)]
+                # print(ha)
+                print(df)
 
-    for ha in haList:
-        # set filter value
-        wb = ws.setFilter('HA Name1', ha, filterDelta=False)
+                # for f in filtered.worksheets:
+                #     # print(f.name)
+                #     if f.name == sheet:
+                #         # drop alias columns & add ha
+                #         # df = df.drop(df.columns[[1,4]], axis=1)
+                #         df = df.loc[:,~df.columns.str.contains('alias', case=False)]
+                #         df = df.assign(health_authority = ha)
 
-        # get new data for the worksheet
-        filtered = wb.getWorksheet(sheet)
-        
-        # create pandas dataframe
-        df = pd.DataFrame(data = filtered.data)
-        
-        # drop alias columns & add ha
-        # df = df.drop(df.columns[[1,4]], axis=1)
-        df = df.assign(health_authority = ha)
+                       
+                    
+                #         # merge datasets
+                #         df_all = pd.concat([df_all, df])
 
-        # text cleanup & copy edits
-        df['health_authority'] = df['health_authority'].str.replace('All BC', 'All B.C.')
-        df['health_authority'] = df['health_authority'].str.replace('Vancouver Island', 'Island')
-        df['health_authority'] = df['health_authority'].str.replace('Vancouver Coastal', 'VCH')
-        
-        # merge datasets
-        df_all = pd.concat([df_all, df])
+                # # get new data for the worksheet
+                # filtered = wb.getWorksheet(sheet)
+                
+                # # create pandas dataframe
+                # df = pd.DataFrame(data = filtered.data)
+                
+               
+                # # text cleanup & copy edits
+                # df['health_authority'] = df['health_authority'].str.replace('All BC', 'All B.C.')
+                # df['health_authority'] = df['health_authority'].str.replace('Vancouver Island', 'Island')
+                # df['health_authority'] = df['health_authority'].str.replace('Vancouver Coastal', 'VCH')
+                
+                #
+    
+    print(df_all)
 
-    # rename columns
-    df_all = df_all.rename(columns={'BCCS Date (C Months)-value':'date','AGG(Rate)-value':'rate', 'Breakdown by-alias':'gender'})
+    # # rename columns
+    # df_all = df_all.rename(columns={'BCCS Date (C Months)-value':'date','AGG(Rate)-value':'rate', 'Breakdown by-alias':'gender'})
 
-    # pivot wider by sex & make colheds reader friendly
-    df2 = df_all.pivot(index=['date','health_authority'],columns='gender', values='rate')
-    df2 = df2.rename(columns={'Male':'Men','Female':'Women'})
+    # # pivot wider by sex & make colheds reader friendly
+    # df2 = df_all.pivot(index=['date','health_authority'],columns='gender', values='rate')
+    # df2 = df2.rename(columns={'Male':'Men','Female':'Women'})
 
-    # write csv file
-    df2.to_csv(output_file)
+    # # write csv file
+    # df2.to_csv(output_file)
 
 def scrapeOpsIndicators(url, sheet, output_file):
     ts.loads(url)
@@ -104,27 +129,32 @@ def scrapeOpsIndicators(url, sheet, output_file):
     df.to_csv(output_file)
 
 def scrapeParamedicEvents(url, sheet, output_file):
-    df_all = pd.DataFrame()
-    
     ts.loads(url)
-    # get the worksheet
-    ws = ts.getWorksheet(sheet)
+    wb = ts.getWorkbook()
+    df_all = pd.DataFrame()
+    # print(wb.getSheets())
+    ws = wb.goToSheet(paramedic_sheet)
 
-    # create pandas dataframe
-    df = pd.DataFrame(data = ws.data)
+    for t in ws.worksheets:
+        if t.name == 'Paramedic Rate Attended (2)':
+            # print(t.data)
+            # create pandas dataframe
+            df = pd.DataFrame(data = t.data)
 
-    for ha in haList:
-        # set filter value
-        wb = ws.setFilter('HA Name1', ha, filterDelta=False)
+            for ha in haList:
+                # set filter value
+                # print(t.getFilters())
+                filtered = t.setFilter('HA Name1', ha, filterDelta=False)
 
-        # get new data for the worksheet
-        filtered = wb.getWorksheet(sheet)
+                # get new data for the worksheet
+                for f in filtered.worksheets:
+                    if f.name == 'Paramedic Rate Attended (2)':        
+                        # print(f.data)
+                        # create pandas dataframe
+                        df = pd.DataFrame(data = f.data)
 
-        # create pandas dataframe
-        df = pd.DataFrame(data = filtered.data)
-
-        # merge datasets
-        df_all = pd.concat([df_all, df])
+                        # merge datasets
+                        df_all = pd.concat([df_all, df])
 
     # drop alias columns & rename the rest
     df_all = df_all.loc[:,~df.columns.str.contains('alias', case=False)]
@@ -143,13 +173,14 @@ def scrapeParamedicEvents(url, sheet, output_file):
     df_all.to_csv(output_file)
 
 
-### AUTOBOTS... ROLL OUT!!! ###
+### AUTOBOTS... ROLL OUT!!! 
 def init():
-    scrapeDeathsBySexHA(od_url, od_sheet, deaths_output)
-    scrapeOpsIndicators(ops_url, ops_sheet, ops_output)
     scrapeParamedicEvents(paramedic_url, paramedic_sheet, paramedic_output)
-    
+    # scrapeDeathsBySexHA(od_sex_url, od_sheet, od_sex_output)
+    # scrapeOpsIndicators(ops_url, ops_sheet, ops_output)
+
     print('TABLEAU DONE!')
 
 
 
+init()
