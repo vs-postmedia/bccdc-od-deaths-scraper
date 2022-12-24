@@ -1,5 +1,6 @@
 ''' pdfScraper.py '''
 
+import ssl
 from asyncore import file_dispatcher
 from cmath import nan
 from operator import index
@@ -131,12 +132,16 @@ def scrapeAges(input_file, output_file):
 
     # the space in "Age Group" will cause trouble later on
     df.rename(columns = {'Age Group': 'Age'}, inplace=True)
-    # print(df)
     df['Age'] = df['Age'].str.replace('<19', 'Under 19')
     
     # Sum by age
     df_long = df.melt(id_vars='Age', var_name='Year', value_name='Deaths', ignore_index=True)
     df_long['Deaths'] = df_long['Deaths'].astype(int)
+
+    # fix PDF glitches
+    df_long['Year'] = df_long['Year'].str.replace('2O0c1t-72 2', '2017')
+
+    # do the math
     df_sum = df_long[df_long['Year'].astype(int) >= 2016 ].groupby(['Age']).sum()
 
     # Sort for Flourish
@@ -219,6 +224,9 @@ def scrapeHaLocation(input_file, output_file):
     df.to_csv(output_file, index=False)
 
 def init():
+    # For SSL certificate error
+    ssl._create_default_https_context = ssl._create_unverified_context
+
     # AUTOBOTS... ROLL OUT!!!
     scrapeAges(deaths_url, age_deaths_path)
     scrapeCityDeaths(deaths_url, city_deaths_ts_path)
