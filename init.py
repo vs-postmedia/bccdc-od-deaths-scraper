@@ -4,4 +4,3 @@ import scripts.tableauScraper as tableauScraper
 
 pdfScraper.init()
 tableauScraper.init()
-
