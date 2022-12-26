@@ -33,14 +33,15 @@ the B.C. Coroners’s Service illicit drug deaths at: https://www2.gov.bc.ca/gov
 
 
 ### Install instructions
-Ugh... this is a serious pita...
+Ugh... this is a serious PITA...
 1. brew install gdal
 2. pip3 install:
     a. pandas
     b. geopandas
     c. tabula-py
     d. tableauscraper
-    e. PyPDF2
+    e. pypdf2
+    f. ssl
 3. Setup package to automate this!!! lol.
 
 

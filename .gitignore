@@ -1,3 +1,6 @@
+# files for testing
+ data/source/drugcheckingbc-sept2022.csv
+
 .DS_Store
 .vscode/settings.json
 data/test.*

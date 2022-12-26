@@ -1,6 +1,6 @@
-import scripts.pdfScraper as pdfScraper
+import scripts.drugDeathScraper as drugDeathScraper
 import scripts.tableauScraper as tableauScraper
 
 
-pdfScraper.init()
+drugDeathScraper.init()
 tableauScraper.init()
