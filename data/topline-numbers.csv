@@ -1,3 +1,5 @@
 metric,value
-deaths_new,171
-deaths_daily,5.7
+deaths_new,179
+deaths_total,10688
+deaths_daily,5.8
+last_update,"October 31, 2022"
