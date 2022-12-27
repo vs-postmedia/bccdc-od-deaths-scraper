@@ -25,9 +25,6 @@ ages_area_v2 = [560,35.05,690,568.67]
 
 ### INPUTS ###
 file_path = './data/source/illicit-drug.pdf'
-deaths_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug.pdf'
-# drugs_url = 'https://www2.gov.bc.ca/assets/gov/birth-adoption-death-marriage-and-divorce/deaths/coroners-service/statistical/illicit-drug-type.pdf'
-
 
 ### OUTPUT FILES ###
 lha_csv_path = './data/deaths-by-lha.csv' # LHA table
@@ -247,7 +244,7 @@ def scrapeToplineNumbers(df_monthly):
     toplineNumbers.init(deaths_total)
 
 
-def init():
+def init(deaths_url):
     # for SSL certificate error
     ssl._create_default_https_context = ssl._create_unverified_context
 

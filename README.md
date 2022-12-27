@@ -16,8 +16,6 @@ the B.C. Coroners’s Service illicit drug deaths at: https://www2.gov.bc.ca/gov
 
 ## MANUAL (just for now, I hope!)
 ### Illicit drug report:
-• *big_num*: Summary text, grafs 1 & 2  
-    • deaths_total = deaths_total + deaths_new
 • LHA map
     • manually overwrite Flourish data:
         • deaths-by-lha.json
