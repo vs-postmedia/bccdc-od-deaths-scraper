@@ -47,12 +47,16 @@ def init(deaths_total):
             deaths_new = text[i].replace('• The total of ', '').strip()
             print('NEW DEATHS: ')
             print(deaths_new)
+        else:
+            deaths_new = ''
 
         # if ('• The number of illicit drug toxicity deaths' in text[i]):
         if ('equates to about' in text[i]):
             deaths_daily = text[i].split('about ')[1].split(' deaths')[0].strip().replace('. ', '.')
             print('DAILY DEATHS: ')
             print(deaths_daily)
+        else:
+            deaths_daily = ''
     
 
     # write list for csv rows

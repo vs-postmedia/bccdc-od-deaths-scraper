@@ -53,6 +53,8 @@ def scrapeAges(input_file, output_file):
         # df comes as list, we don't want that
         df = df2[0]
 
+    # drop NaN rows
+    df.dropna(inplace=True)
     # the space in "Age Group" will cause trouble later on
     df.rename(columns = {'Age Group': 'Age'}, inplace=True)
     df['Age'] = df['Age'].str.replace('<19', 'Under 19')
@@ -63,6 +65,7 @@ def scrapeAges(input_file, output_file):
 
     # fix PDF glitches
     df_long['Year'] = df_long['Year'].str.replace('2O0c1t-72 2', '2017')
+    df_long['Year'] = df_long['Year'].str.replace('2N0o1v-72 2', '2017')
 
     # do the math
     df_sum = df_long[df_long['Year'].astype(int) >= 2016 ].groupby(['Age']).sum()
